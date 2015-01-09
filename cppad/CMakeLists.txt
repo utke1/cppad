@@ -1,4 +1,4 @@
-#CppAD $Id$
+# $Id:$
 # -----------------------------------------------------------------------------
 # CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-14 Bradley M. Bell
 #
@@ -48,17 +48,17 @@ command_line_arg(cppad_tape_addr_type "unsigned int" STRING
 "type used to identify variables on one tape, size must be <= sizeof(size_t)"
 )
 #
-# cppad_implicit_ctor_from_any_type_from_any_type
-command_line_arg(cppad_implicit_ctor_from_any_type_from_any_type NO BOOL 
+# cppad_implicit_ctor_from_any_type
+command_line_arg(cppad_implicit_ctor_from_any_type NO BOOL 
 	"implicit (instead of explicit) conversion from any type to AD<Base>"
 )
 # -----------------------------------------------------------------------------
 # cppad_explicit_ctor
-IF( cppad_implicit_ctor_from_any_type_from_any_type )
+IF( cppad_implicit_ctor_from_any_type )
 	SET(cppad_implicit_ctor_from_any_type 1)
-ELSE( cppad_implicit_ctor_from_any_type_from_any_type )
+ELSE( cppad_implicit_ctor_from_any_type )
 	SET(cppad_implicit_ctor_from_any_type 0)
-ENDIF( cppad_implicit_ctor_from_any_type_from_any_type )
+ENDIF( cppad_implicit_ctor_from_any_type )
 # -----------------------------------------------------------------------------
 # cppad_internal_sparse_set
 #
@@ -108,72 +108,40 @@ ENDIF( cppad_eigenvector )
 # -----------------------------------------------------------------------------
 # cppad_has_rvalue
 #
-# CHECK_CXX_SOURCE_RUNS(source variable)
-SET(CMAKE_REQUIRED_INCLUDES  "")
-SET(CMAKE_REQUIRED_LIBRARIES "")
-SET(CMAKE_REQUIRED_FLAGS     ${cppad_cxx_flags})
 SET(source "
 int main(void)
 {	int&& value = 1 + 2;
 	if( value != 3 )
 		return 1;
 	return 0;
-}" )
-CHECK_CXX_SOURCE_RUNS("${source}" rvalue_ok)
-IF( rvalue_ok )
-	SET(cppad_has_rvalue 1)
-ELSE( rvalue_ok )
-	SET(cppad_has_rvalue 0)
-ENDIF( rvalue_ok )
-MESSAGE(STATUS "cppad_has_rvalue = ${cppad_has_rvalue}" )
+}" 
+)
+check_source_runs("${source}" cppad_has_rvalue)
 # -----------------------------------------------------------------------------
 # cppad_has_nullptr
 #
-# CHECK_CXX_SOURCE_RUNS(source variable)
-SET(CMAKE_REQUIRED_INCLUDES  "")
-SET(CMAKE_REQUIRED_LIBRARIES "")
-SET(CMAKE_REQUIRED_FLAGS     ${cppad_cxx_flags})
 SET(source "
 int main(void)
 {	char *c = nullptr;
 	return 0;
-}" )
-CHECK_CXX_SOURCE_RUNS("${source}" nullptr_ok)
-IF( nullptr_ok )
-	SET(cppad_has_nullptr 1)
-ELSE( nullptr_ok )
-	SET(cppad_has_nullptr 0)
-ENDIF( nullptr_ok )
-MESSAGE(STATUS "cppad_has_nullptr = ${cppad_has_nullptr}" )
-
+}"
+)
+check_source_runs("${source}" cppad_has_nullptr)
 # -----------------------------------------------------------------------------
 # cppad_has_gettimeofday
 #
-# CHECK_CXX_SOURCE_RUNS(source variable)
-SET(CMAKE_REQUIRED_INCLUDES  "")
-SET(CMAKE_REQUIRED_LIBRARIES "")
-SET(CMAKE_REQUIRED_FLAGS     "")
 SET(source "
 # include<sys/time.h>
 int main(void)
 {	struct timeval time;
 	gettimeofday(&time, 0);
 	return 0;
-}" )
-CHECK_CXX_SOURCE_RUNS("${source}" gettimeofday_ok)
-IF( gettimeofday_ok )
-	SET(cppad_has_gettimeofday 1)
-ELSE( gettimeofday_ok )
-	SET(cppad_has_gettimeofday 0)
-ENDIF( gettimeofday_ok )
-MESSAGE(STATUS "cppad_has_gettimeofday = ${cppad_has_gettimeofday}" )
+}"
+)
+check_source_runs("${source}" cppad_has_gettimeofday)
 # -----------------------------------------------------------------------------
-# cppad_size_t_same_unsigned_int
+# cppad_size_t_not_unsigned_int
 #
-# CHECK_CXX_SOURCE_RUNS(source variable)
-SET(CMAKE_REQUIRED_INCLUDES  "")
-SET(CMAKE_REQUIRED_LIBRARIES "")
-SET(CMAKE_REQUIRED_FLAGS     "")
 SET(source "
 # include <cstring>
 template <class T> inline bool is_pod(void)               { return false; }
@@ -181,45 +149,74 @@ template <>        inline bool is_pod<unsigned int>(void) { return true;  }
 template <>        inline bool is_pod<size_t>(void)       { return true;  }  
 int main(void)
 {	return 0; }
-" )
-CHECK_CXX_SOURCE_RUNS("${source}" size_t_not_unsigned_int)
-IF( size_t_not_unsigned_int )
-	SET(cppad_size_t_same_unsigned_int 0)
-ELSE( size_t_not_unsigned_int )
-	SET(cppad_size_t_same_unsigned_int 1)
-ENDIF( size_t_not_unsigned_int )
-MESSAGE(STATUS 
-	"cppad_size_t_same_unsigned_int = ${cppad_size_t_same_unsigned_int}" 
+"
 )
+check_source_runs("${source}" cppad_size_t_not_unsigned_int)
+# -----------------------------------------------------------------------------
+# cppad_has_cstdint_8_to_64
+#
+SET(source "
+# include <cstdint>
+template <class T> inline bool is_pod(void)               { return false; }
+template <>        inline bool is_pod<uint8_t>(void)      { return true;  }  
+template <>        inline bool is_pod<uint16_t>(void)     { return true;  }  
+template <>        inline bool is_pod<uint32_t>(void)     { return true;  }  
+template <>        inline bool is_pod<uint64_t>(void)     { return true;  }  
+int main(void)
+{	return 0; }
+"
+)
+check_source_runs("${source}" cppad_has_cstdint_8_to_64)
+# -----------------------------------------------------------------------------
+# cppad_compiler_has_erf
+#
+SET(source "
+# include <cmath>
+int main(void)
+{	if( std::erf(0.0) == 0.0 )
+		return 0; 
+	return 1;
+}
+"
+)
+check_source_runs("${source}" cppad_compiler_has_erf)
 # -----------------------------------------------------------------------------
 # cppad_tape_addr_type, cppad_tape_id_type
 #
-FOREACH( cmake_var cppad_tape_id_type cppad_tape_addr_type )
+FOREACH(cmake_var cppad_tape_id_type cppad_tape_addr_type )
 	SET(source "
 # include <limits>
 int main(void)
 {	bool is_signed = std::numeric_limits<${${cmake_var}}>::is_signed;
 	return int(! is_signed);
 }
-" )
-	CHECK_CXX_SOURCE_RUNS("${source}" ${cmake_var}_is_signed)
-	IF( ${cmake_var}_is_signed  )
+"
+	)
+	check_source_runs("${source}" ${cmake_var}_is_signed)
+	IF( ${cmake_var}_is_signed STREQUAL 1  )
 		MESSAGE(STATUS 
 "Warning: using a signed ${cmake_var} (for CppAD developers not users)" 
 	)
-	ENDIF( ${cmake_var}_is_signed  )
+	ENDIF( ${cmake_var}_is_signed STREQUAL 1  )
 ENDFOREACH( cmake_var )
 # -----------------------------------------------------------------------------
 # cppad_max_num_threads
 #
+SET(CMAKE_REQUIRED_INCLUDES  "")
+SET(CMAKE_REQUIRED_LIBRARIES "")
+SET(CMAKE_REQUIRED_FLAGS     )
 SET(source "
 int main(void)
 {	const char* number = \"${cppad_max_num_threads}\";
 	int value = 0;
-	while( '0' <= *number && *number <= '9' && *number != char(0) )
+	while( *number == ' ' )
+		number++;
+	while( '0' <= *number && *number <= '9' )
 	{	value = 10 * value + (int)(*number - '0');
 		number++;
 	}
+	while( *number == ' ' )
+		number++;
 	if( *number != char(0) )
 		return 1;
 	if( value < 4 )

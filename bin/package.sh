@@ -1,7 +1,7 @@
 #! /bin/bash -e
 # $Id$
 # -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-14 Bradley M. Bell
+# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-15 Bradley M. Bell
 #
 # CppAD is distributed under multiple licenses. This distribution is under
 # the terms of the 
@@ -62,6 +62,7 @@ echo_log_eval bin/version.sh copy
 # Run automated checking of file names in original source directory
 # (check_include_omh.sh uses files built by cmake)
 list="
+	check_copyright.sh
 	check_define.sh
 	check_example.sh
 	check_if.sh
@@ -117,13 +118,15 @@ file_list=`find . \
 		-e '/\/new\//d' \
 		-e '/\.\/build\//d' \
 		-e '/bug\/build\//d' \
-		-e '/\/junk.sh$/d' \
-		-e '/\/temp.sh$/d' \
+		-e '/\/junk\.[a-z]*$/d' \
+		-e '/\/temp\.[a-z]*$/d' \
 		-e 's|^\./||'`
 other_files="
 	AUTHORS 
 	ChangeLog 
 	configure 
+	config.guess
+	config.sub
 	COPYING 
 	depcomp
 	INSTALL 

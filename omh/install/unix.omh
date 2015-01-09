@@ -82,14 +82,17 @@ $index install, unix CppAD$$
 $section Deprecated Unix Test and Installation$$
 
 $head Deprecated$$
-These install instructions have been deprecated.
+These install instructions have been deprecated and no improvements
+have been added since 2012.
+For example, this install procedure will not detect any of the 
+$code c++11$$ extensions.
 You should use the $cref cmake$$ instructions to install CppAD.
 
 $head Distribution Directory$$
 You must first obtain a copy of the CppAD distribution directory
 using the $cref download$$ instructions.
 The install instructions below correspond to the
-$cref/current version/download/Compressed Tar File/Current Version/$$
+$cref/current version/download/Compressed Archives/Current Version/$$
 which has distribution directory $code cppad-20121230$$. 
 
 $head Work Directory$$
@@ -392,10 +395,7 @@ $codei%
 $head adolc_dir$$
 $index Adolc, unix$$
 If you have 
-$href%
-	http://www.math.tu-dresden.de/~adol-c/%
-	Adolc 1.10.2
-%$$
+$href%https://projects.coin-or.org/ADOL-C%ADOL-C%$$
 installed on your system, you can 
 specify a value for $icode adolc_dir$$ in the 
 $cref/configure/InstallUnix/Configure/$$ command line.

@@ -46,6 +46,8 @@ then
 		echo 'No change in CMakeLists.txt'
 		exit 1
 	fi
+	echo_eval rm CMakeLists.txt.old
+	#
 	echo 'bin/version.sh set: OK'
 	exit 0
 fi
@@ -75,7 +77,7 @@ sed  \
 #
 echo 'sed -i.old configure.ac ...'
 sed  \
-	-e "s/(cppad, [0-9]\{8\}[.0-9]* *,/(cppad, $version,/"  \
+	-e "s/(\[cppad\], *\[[0-9]\{8\}[.0-9]*\] *,/([cppad], [$version],/"  \
 	-i.old configure.ac
 #
 echo 'sed -i.old configure ...'

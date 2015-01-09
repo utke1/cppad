@@ -66,7 +66,8 @@ extern bool change_const(void);
 extern bool check_for_nan(void);
 extern bool CheckNumericType(void);
 extern bool CheckSimpleVector(void);
-extern bool colpack(void);
+extern bool colpack_hes(void);
+extern bool colpack_jac(void);
 extern bool Compare(void);
 extern bool CompareChange(void);
 extern bool complex_poly(void);
@@ -87,6 +88,7 @@ extern bool ForOne(void);
 extern bool ForTwo(void);
 extern bool ForSparseJac(void);
 extern bool Forward(void);
+extern bool forward_dir(void);
 extern bool forward_order(void);
 extern bool fun_assign(void);
 extern bool FunCheck(void);
@@ -121,7 +123,6 @@ extern bool mul_level_adolc_ode(void);
 extern bool nan(void);
 extern bool Near_Equal(void);
 extern bool NearEqualExt(void);
-extern bool not_complex_ad(void);
 extern bool number_skip(void);
 extern bool NumericType(void);
 extern bool OdeErrControl(void);
@@ -243,6 +244,7 @@ int main(void)
 	ok &= Run( ForOne,            "ForOne"           );
 	ok &= Run( ForTwo,            "ForTwo"           );
 	ok &= Run( Forward,           "Forward"          ); 
+	ok &= Run( forward_dir,       "forward_dir"      ); 
 	ok &= Run( forward_order,     "forward_order"    ); 
 	ok &= Run( ForSparseJac,      "ForSparseJac"     );
 	ok &= Run( fun_assign,        "fun_assign"       );
@@ -276,7 +278,6 @@ int main(void)
 	ok &= Run( nan,               "nan"              );
 	ok &= Run( Near_Equal,        "Near_Equal"       );
 	ok &= Run( NearEqualExt,      "NearEqualExt"     );
-	ok &= Run( not_complex_ad,    "not_complex_ad"   );
 	ok &= Run( number_skip,       "number_skip"      );
 	ok &= Run( NumericType,       "NumericType"      );
 	ok &= Run( OdeErrControl,     "OdeErrControl"    );
@@ -331,7 +332,8 @@ int main(void)
 	ok &= Run( mul_level_adolc_ode,  "mul_level_adolc_ode" );
 # endif
 # ifdef CPPAD_COLPACK_EXAMPLES
-	ok &= Run( colpack,           "colpack"          );
+	ok &= Run( colpack_hes,       "colpack_hes"      );
+	ok &= Run( colpack_jac,       "colpack_jac"      );
 # endif
 # ifdef CPPAD_EIGEN_EXAMPLES
 	ok &= Run( eigen_array,       "eigen_array"      );

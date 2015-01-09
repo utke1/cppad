@@ -117,7 +117,8 @@ do
 	fi
 	if grep "GNU General Public License" $archive_name/$file > /dev/null
 	then
-		if [ "$name" != "doc.omh" ]
+		echo "gpl_license.sh: name=$name"
+		if [ "$name" != "doc.omh" ] && [ "$name" != 'download.omh' ]
 		then
 			echo "GPL license in initial $archive_name/$file"
 			exit 1
@@ -130,7 +131,11 @@ do
 	if ! grep "GNU General Public License Version 3" $archive_name/$file \
 		> /dev/null
 	then
-		if [ "$name" != 'config.h.in' ] && [ "$name" != 'colpack.sh' ]
+		if \
+		[ "$name" != 'config.h.in' ]   && \
+		[ "$name" != 'colpack.sh' ]    && \
+		[ "$name" != 'svn_commit.sh' ] && \
+		[ "$name" != 'git_commit.sh' ] 
 		then
 			echo "Cannot change EPL to GPL for $archive_name/$file"
 			exit 1

@@ -19,7 +19,7 @@ $spell
 	num
 	Jac
 	bool
-	taylor_
+	taylor
 	var
 	ADvector
 	const
@@ -71,7 +71,7 @@ $codei%
 and 
 $codei%
 	ADFun<%Base%> %f%(%x%, %y%)
-%$$.
+%$$
 
 $head y$$
 If the argument $icode y$$ is present, it has prototype
@@ -107,7 +107,6 @@ $head Sequence Constructor$$
 $index sequence, ADFun constructor$$
 $index ADFun, sequence constructor$$
 $index constructor, ADFun sequence$$
-The default constructor 
 The sequence constructor 
 $codei%
 	ADFun<%Base%> %f%(%x%, %y%)
@@ -119,7 +118,7 @@ $codei%
 	Independent(%x%)
 %$$
 and stores the corresponding operation sequence in the object $icode f$$.
-It then stores the first order taylor_ coefficients 
+It then stores the zero order Taylor coefficients 
 (corresponding to the value of $icode x$$) in $icode f$$.
 This is equivalent to the following steps using the default constructor:
 
@@ -135,7 +134,7 @@ $codei%
 %$$
 (see $cref Dependent$$).
 $lnext
-Calculating the first order taylor_ coefficients for all 
+Calculate the zero order Taylor coefficients for all 
 the variables in the operation sequence using
 $codei%
 	%f%.Forward(%p%, %x_p%)
@@ -165,7 +164,7 @@ $index operator, ADFun assignment$$
 The $codei%ADFun<%Base%>%$$ assignment operation
 $codei%
 	%g% = %f%
-%$$.
+%$$
 makes a copy of the operation sequence currently stored in $icode f$$
 in the object $icode g$$.
 The object $icode f$$ is not affected by this operation and
@@ -240,7 +239,6 @@ $end
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file fun_construct.hpp
 ADFun function constructors and assignment operator.
 */
@@ -299,6 +297,7 @@ void ADFun<Base>::operator=(const ADFun<Base>& f)
 	compare_change_            = f.compare_change_;
 	num_order_taylor_          = f.num_order_taylor_;
 	cap_order_taylor_          = f.cap_order_taylor_;
+	num_direction_taylor_      = f.num_direction_taylor_;
 	num_var_tape_              = f.num_var_tape_;
 	//
 	// CppAD::vector objects
@@ -433,9 +432,12 @@ ADFun<Base>::ADFun(const VectorAD &x, const VectorAD &y)
 
 	// allocate memory for one zero order taylor_ coefficient
 	CPPAD_ASSERT_UNKNOWN( num_order_taylor_ == 0 );
+	CPPAD_ASSERT_UNKNOWN( num_direction_taylor_ == 0 );
 	size_t c = 1;
-	capacity_order(c);
+	size_t r = 1;
+	capacity_order(c, r);
 	CPPAD_ASSERT_UNKNOWN( cap_order_taylor_     == c );
+	CPPAD_ASSERT_UNKNOWN( num_direction_taylor_ == r );
 
 	// set zero order coefficients corresponding to indpendent variables
 	CPPAD_ASSERT_UNKNOWN( n == ind_taddr_.size() );

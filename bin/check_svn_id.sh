@@ -16,29 +16,23 @@ then
 	exit 1
 fi
 # -----------------------------------------------------------------------------
-echo "Checking for \$Id:.*\$ in beginning of source code"
+echo "Checking for \$Id.*\$ in beginning of source code"
 echo "-------------------------------------------------------" 
 ok="yes"
-list=`find . \
-	\( -name \*.hpp \) -or \
-	\( -name \*.cpp \) -or \
-	\( -name \*.omh \) -or \
-	\( -name \*.sh \) -or \
-	\( -name \*.in \) -or \
-	\( -name makefile.am \) -or \
-	\( -name CMakeLists.txt \) |
-	sed \
-		-e '/\/build\//d'  \
-		-e '/makefile\.in/d'  \
-		-e '/config\.h\.in/d' \
-		-e '/\/junk\./d' \
-		-e '/\/temp\./d'
-`
+list=`bin/list_files.sh .hpp .cpp .omh .sh .in .am .txt | sed \
+	-e '/^gpl-3.0.txt$/d' \
+	-e '/^epl-v10.txt$/d' \
+	-e '/cppad\/local\/config.h.in$/d' \
+	-e '/^makefile.in$/d' \
+	-e '/^svn_commit.sh$/d' \
+	-e '/^git_commit.sh$/d' \
+	-e '/\/makefile.in$/d' `
+#
 for file in $list
 do
-	if ! head -2 $file | grep '$Id:.*\$' > /dev/null
+	if ! head -2 $file | grep '$Id.*\$' > /dev/null
 	then
-		echo "$file does not have '\$Id:.*\$' in first two lines"
+		echo "$file does not have '\$Id.*\$' in first two lines"
 		ok="no"
 	fi
 done

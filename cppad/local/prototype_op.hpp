@@ -16,7 +16,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file prototype_op.hpp
 Documentation for generic cases (these generic cases are never used).
 */
@@ -46,27 +45,26 @@ i.e. the row index in \a taylor corresponding to z.
 variable index corresponding to the argument for this operator;
 i.e. the row index in \a taylor corresponding to x.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\b Input: <code>taylor [ i_x * nc_taylor + k ]</code>, 
+\b Input: <code>taylor [ i_x * cap_order + k ]</code>, 
 for k = 0 , ... , q,
 is the k-th order Taylor coefficient corresponding to x.
 \n
-\b Input: <code>taylor [ i_z * nc_taylor + k ]</code>, 
+\b Input: <code>taylor [ i_z * cap_order + k ]</code>, 
 for k = 0 , ... , p-1,
 is the k-th order Taylor coefficient corresponding to z.
 \n
-\b Output: <code>taylor [ i_z * nc_taylor + k ]</code>, 
+\b Output: <code>taylor [ i_z * cap_order + k ]</code>, 
 for k = p , ... , q,
 is the k-th order Taylor coefficient corresponding to z. 
 
 \par Checked Assertions
 \li NumArg(op) == 1
 \li NumRes(op) == 1
-\li i_x < i_z 
-\li q < nc_taylor
+\li q < cap_order
 \li p <= q
 */
 template <class Base>
@@ -75,7 +73,83 @@ inline void forward_unary1_op(
 	size_t q           ,
 	size_t i_z         ,
 	size_t i_x         ,
-	size_t nc_taylor   , 
+	size_t cap_order   , 
+	Base*  taylor      )
+{
+	// This routine is only for documentaiton, it should not be used
+	CPPAD_ASSERT_UNKNOWN( false );
+}
+
+/*!
+Prototype for multiple direction forward mode unary operator with one result
+(not used).
+
+\tparam Base
+base type for the operator; i.e., this operation was recorded
+using AD< \a Base > and computations by this routine are done using type 
+\a Base.
+
+\param q
+order of the Taylor coefficients that we are computing.
+
+\param r
+number of directions for Taylor coefficients that we are computing.
+
+\param i_z
+variable index corresponding to the last (primary) result for this operation; 
+i.e. the row index in \a taylor corresponding to z. 
+The auxillary result is called y has index \a i_z - 1.
+
+\param i_x
+variable index corresponding to the argument for this operator;
+i.e. the row index in \a taylor corresponding to x.
+
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
+
+\par tpv
+We use the notation
+<code>tpv = (cap_order-1) * r + 1</code>
+which is the number of Taylor coefficients per variable
+
+\param taylor
+\b Input: If x is a variable, 
+<code>taylor [ arg[0] * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ arg[0] * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to x and the ell-th direction.
+\n
+\b Input: <code>taylor [ i_z * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ i_z * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q-1,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to z and the ell-th direction.
+\n
+\b Output: 
+<code>taylor [ i_z * tpv + (q-1)*r + ell + 1]</code>, 
+ell = 0, ..., r-1,
+is the q-th order Taylor coefficient 
+corresponding to z and the ell-th direction. 
+
+\par Checked Assertions 
+\li NumArg(op) == 1
+\li NumRes(op) == 2
+\li i_x < i_z 
+\li 0 < q 
+\li q < cap_order
+*/
+template <class Base>
+inline void forward_unary1_op_dir(
+	size_t q           ,
+	size_t r           ,
+	size_t i_z         ,
+	size_t i_x         ,
+	size_t cap_order   , 
 	Base*  taylor      )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -97,27 +171,27 @@ i.e. the row index in \a taylor corresponding to z.
 variable index corresponding to the argument for this operator;
 i.e. the row index in \a taylor corresponding to x.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\b Input: \a taylor [ \a i_x * \a nc_taylor + 0 ] 
+\b Input: \a taylor [ \a i_x * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to x. 
 \n
-\b Output: \a taylor [ \a i_z * \a nc_taylor + 0 ] 
+\b Output: \a taylor [ \a i_z * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to z. 
 
 \par Checked Assertions 
 \li NumArg(op) == 1
 \li NumRes(op) == 1
 \li \a i_x < \a i_z 
-\li \a 0 < \a nc_taylor
+\li \a 0 < \a cap_order
 */
 template <class Base>
 inline void forward_unary1_op_0(
 	size_t i_z         ,
 	size_t i_x         ,
-	size_t nc_taylor   , 
+	size_t cap_order   , 
 	Base*  taylor      )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -151,15 +225,15 @@ i.e. the row index in \a taylor to z.
 variable index corresponding to the argument for this operation;
 i.e. the row index in \a taylor corresponding to x.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\a taylor [ \a i_x * \a nc_taylor + k ] 
+\a taylor [ \a i_x * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to x.
 \n
-\a taylor [ \a i_z * \a nc_taylor + k ] 
+\a taylor [ \a i_z * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to z.
 
@@ -191,7 +265,7 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li NumArg(op) == 1
 \li NumRes(op) == 1
 \li \a i_x < \a i_z 
-\li \a d < \a nc_taylor
+\li \a d < \a cap_order
 \li \a d < \a nc_partial
 */
 template <class Base>
@@ -199,7 +273,7 @@ inline void reverse_unary1_op(
 	size_t      d            ,
 	size_t      i_z          ,
 	size_t      i_x          ,
-	size_t      nc_taylor    , 
+	size_t      cap_order    , 
 	const Base* taylor       ,
 	size_t      nc_partial   ,
 	Base*       partial      )
@@ -233,27 +307,27 @@ The auxillary result is called y has index \a i_z - 1.
 variable index corresponding to the argument for this operator;
 i.e. the row index in \a taylor corresponding to x.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\b Input: <code>taylor [ i_x * nc_taylor + k ]</code> 
+\b Input: <code>taylor [ i_x * cap_order + k ]</code> 
 for k = 0 , ... , q,
 is the k-th order Taylor coefficient corresponding to x.
 \n
-\b Input: <code>taylor [ i_z * nc_taylor + k ]</code> 
+\b Input: <code>taylor [ i_z * cap_order + k ]</code> 
 for k = 0 , ... , p - 1,
 is the k-th order Taylor coefficient corresponding to z.
 \n
-\b Input: <code>taylor [ ( i_z - 1) * nc_taylor + k ]</code> 
+\b Input: <code>taylor [ ( i_z - 1) * cap_order + k ]</code> 
 for k = 0 , ... , p-1,
 is the k-th order Taylor coefficient corresponding to the auxillary result y.
 \n
-\b Output: <code>taylor [ i_z * nc_taylor + k ]</code>,
+\b Output: <code>taylor [ i_z * cap_order + k ]</code>,
 for k = p , ... , q,
 is the k-th order Taylor coefficient corresponding to z. 
 \n
-\b Output: <code>taylor [ ( i_z - 1 ) * nc_taylor + k ]</code>, 
+\b Output: <code>taylor [ ( i_z - 1 ) * cap_order + k ]</code>, 
 for k = p , ... , q,
 is the k-th order Taylor coefficient corresponding to 
 the autillary result y.
@@ -262,7 +336,7 @@ the autillary result y.
 \li NumArg(op) == 1
 \li NumRes(op) == 2
 \li i_x + 1 < i_z 
-\li q < nc_taylor
+\li q < cap_order
 \li p <= q 
 */
 template <class Base>
@@ -271,7 +345,90 @@ inline void forward_unary2_op(
 	size_t q           ,
 	size_t i_z         ,
 	size_t i_x         ,
-	size_t nc_taylor   , 
+	size_t cap_order   , 
+	Base*  taylor      )
+{
+	// This routine is only for documentaiton, it should not be used
+	CPPAD_ASSERT_UNKNOWN( false );
+}
+
+/*!
+Prototype for multiple direction forward mode unary operator with two results 
+(not used).
+
+\tparam Base
+base type for the operator; i.e., this operation was recorded
+using AD< \a Base > and computations by this routine are done using type 
+\a Base.
+
+\param q
+order of the Taylor coefficients that we are computing.
+
+\param r 
+number of directions for Taylor coefficients that we are computing.
+
+\param i_z
+variable index corresponding to the last (primary) result for this operation; 
+i.e. the row index in \a taylor corresponding to z. 
+The auxillary result is called y has index \a i_z - 1.
+
+\param i_x
+variable index corresponding to the argument for this operator;
+i.e. the row index in \a taylor corresponding to x.
+
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
+
+\par tpv
+We use the notation
+<code>tpv = (cap_order-1) * r + 1</code>
+which is the number of Taylor coefficients per variable
+
+\param taylor
+\b Input: <code>taylor [ i_x * tpv + 0 ]</code> 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ i_x * tpv + (k-1)*r + ell + 1</code>
+for k = 1 , ... , q,
+ell = 0 , ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to x and the ell-th direction.
+\n
+\b Input: <code>taylor [ i_z * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ i_z * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q-1,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to z and the ell-th direction.
+\n
+\b Input: <code>taylor [ (i_z-1) * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ (i_z-1) * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q-1,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to the auxillary result y and the ell-th direction.
+\n
+\b Output: 
+<code>taylor [ i_z * tpv + (q-1)*r + ell + 1]</code>, 
+ell = 0, ..., r-1,
+is the q-th order Taylor coefficient 
+corresponding to z and the ell-th direction. 
+
+\par Checked Assertions 
+\li NumArg(op) == 1
+\li NumRes(op) == 2
+\li i_x + 1 < i_z 
+\li 0 < q 
+\li q < cap_order
+*/
+template <class Base>
+inline void forward_unary2_op_dir(
+	size_t q           ,
+	size_t r           ,
+	size_t i_z         ,
+	size_t i_x         ,
+	size_t cap_order   , 
 	Base*  taylor      )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -294,17 +451,17 @@ The auxillary result is called y and has index \a i_z - 1.
 variable index corresponding to the argument for this operator;
 i.e. the row index in \a taylor corresponding to x.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\b Input: \a taylor [ \a i_x * \a nc_taylor + 0 ] 
+\b Input: \a taylor [ \a i_x * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to x. 
 \n
-\b Output: \a taylor [ \a i_z * \a nc_taylor + 0 ] 
+\b Output: \a taylor [ \a i_z * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to z. 
 \n
-\b Output: \a taylor [ ( \a i_z - 1 ) * \a nc_taylor + j ] 
+\b Output: \a taylor [ ( \a i_z - 1 ) * \a cap_order + j ] 
 is the j-th order Taylor coefficient corresponding to 
 the autillary result y. 
 
@@ -312,13 +469,13 @@ the autillary result y.
 \li NumArg(op) == 1
 \li NumRes(op) == 2
 \li \a i_x + 1 < \a i_z 
-\li \a j < \a nc_taylor
+\li \a j < \a cap_order
 */
 template <class Base>
 inline void forward_unary2_op_0(
 	size_t i_z         ,
 	size_t i_x         ,
-	size_t nc_taylor   , 
+	size_t cap_order   , 
 	Base*  taylor      )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -353,19 +510,19 @@ The auxillary result is called y and has index \a i_z - 1.
 variable index corresponding to the argument for this operation;
 i.e. the row index in \a taylor corresponding to x.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\a taylor [ \a i_x * \a nc_taylor + k ] 
+\a taylor [ \a i_x * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to x.
 \n
-\a taylor [ \a i_z * \a nc_taylor + k ] 
+\a taylor [ \a i_z * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to z.
 \n
-\a taylor [ ( \a i_z - 1) * \a nc_taylor + k ] 
+\a taylor [ ( \a i_z - 1) * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to 
 the auxillary variable y.
@@ -404,7 +561,7 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li NumArg(op) == 1
 \li NumRes(op) == 2
 \li \a i_x + 1 < \a i_z 
-\li \a d < \a nc_taylor
+\li \a d < \a cap_order
 \li \a d < \a nc_partial
 */
 template <class Base>
@@ -412,7 +569,7 @@ inline void reverse_unary2_op(
 	size_t      d            ,
 	size_t      i_z          ,
 	size_t      i_x          ,
-	size_t      nc_taylor    , 
+	size_t      cap_order    , 
 	const Base* taylor       ,
 	size_t      nc_partial   ,
 	Base*       partial      )
@@ -456,34 +613,32 @@ is the value corresponding to x.
 If y is a parameter, \a parameter [ \a arg[1] ] 
 is the value corresponding to y.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
 \b Input: If x is a variable, 
-<code>taylor [ arg[0] * nc_taylor + k ]</code>, 
+<code>taylor [ arg[0] * cap_order + k ]</code>, 
 for k = 0 , ... , q,
 is the k-th order Taylor coefficient corresponding to x.
 \n
 \b Input: If y is a variable, 
-<code>taylor [ arg[1] * nc_taylor + k ]</code>, 
+<code>taylor [ arg[1] * cap_order + k ]</code>, 
 for k = 0 , ... , q,
 is the k-th order Taylor coefficient corresponding to y.
 \n
-\b Input: <code>taylor [ i_z * nc_taylor + k ]</code>, 
+\b Input: <code>taylor [ i_z * cap_order + k ]</code>, 
 for k = 0 , ... , p-1,
 is the k-th order Taylor coefficient corresponding to z.
 \n
-\b Output: <code>taylor [ i_z * nc_taylor + k ]</code>, 
+\b Output: <code>taylor [ i_z * cap_order + k ]</code>, 
 for k = p, ... , q,
 is the k-th order Taylor coefficient corresponding to z. 
 
 \par Checked Assertions
 \li NumArg(op) == 2
 \li NumRes(op) == 1
-\li If x is a variable, arg[0] < i_z 
-\li If y is a variable, arg[1] < i_z 
-\li q <  nc_taylor
+\li q <  cap_order
 \li p <=  q
 */
 template <class Base>
@@ -493,7 +648,101 @@ inline void forward_binary_op(
 	size_t        i_z        ,
 	const addr_t* arg        ,
 	const Base*   parameter  ,
-	size_t        nc_taylor  , 
+	size_t        cap_order  , 
+	Base*         taylor     )
+{
+	// This routine is only for documentaiton, it should not be used
+	CPPAD_ASSERT_UNKNOWN( false );
+}
+
+/*!
+Prototype multiple direction forward mode x op y (not used)
+
+\tparam Base
+base type for the operator; i.e., this operation was recorded
+using AD< \a Base > and computations by this routine are done using type 
+\a Base.
+
+\param q
+is the order of the Taylor coefficients that we are computing.
+
+\param r
+number of directions for Taylor coefficients that we are computing
+
+\param i_z
+variable index corresponding to the result for this operation; 
+i.e. the row index in \a taylor corresponding to z. 
+
+\param arg
+\a arg[0]
+index corresponding to the left operand for this operator;
+i.e. the index corresponding to x.
+\n
+\a arg[1]
+index corresponding to the right operand for this operator;
+i.e. the index corresponding to y.
+
+\param parameter
+If x is a parameter, \a parameter [ \a arg[0] ] 
+is the value corresponding to x.
+\n
+If y is a parameter, \a parameter [ \a arg[1] ] 
+is the value corresponding to y.
+
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
+
+\par tpv
+We use the notation
+<code>tpv = (cap_order-1) * r + 1</code>
+which is the number of Taylor coefficients per variable
+
+\param taylor
+\b Input: If x is a variable, 
+<code>taylor [ arg[0] * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ arg[0] * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to x and the ell-th direction.
+\n
+\b Input: If y is a variable, 
+<code>taylor [ arg[1] * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ arg[1] * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to y and the ell-th direction.
+\n
+\b Input: <code>taylor [ i_z * tpv + 0 ]</code>, 
+is the zero order Taylor coefficient for all directions and
+<code>taylor [ i_z * tpv + (k-1)*r + ell + 1 ]</code>, 
+for k = 1 , ... , q-1,
+ell = 0, ..., r-1,
+is the k-th order Taylor coefficient 
+corresponding to z and the ell-th direction.
+\n
+\b Output: 
+<code>taylor [ i_z * tpv + (q-1)*r + ell + 1]</code>, 
+ell = 0, ..., r-1,
+is the q-th order Taylor coefficient 
+corresponding to z and the ell-th direction. 
+
+\par Checked Assertions
+\li NumArg(op) == 2
+\li NumRes(op) == 1
+\li 0 < q <  cap_order
+*/
+template <class Base>
+inline void forward_binary_op_dir(
+	size_t        q          ,
+	size_t        r          ,
+	size_t        i_z        ,
+	const addr_t* arg        ,
+	const Base*   parameter  ,
+	size_t        cap_order  , 
 	Base*         taylor     )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -529,31 +778,29 @@ is the value corresponding to x.
 If y is a parameter, \a parameter [ \a arg[1] ] 
 is the value corresponding to y.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\b Input: If x is a variable, \a taylor [ \a arg[0] * \a nc_taylor + 0 ] 
+\b Input: If x is a variable, \a taylor [ \a arg[0] * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to x.
 \n
-\b Input: If y is a variable, \a taylor [ \a arg[1] * \a nc_taylor + 0 ] 
+\b Input: If y is a variable, \a taylor [ \a arg[1] * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to y.
 \n
-\b Output: \a taylor [ \a i_z * \a nc_taylor + 0 ] 
+\b Output: \a taylor [ \a i_z * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to z. 
 
 \par Checked Assertions
 \li NumArg(op) == 2
 \li NumRes(op) == 1
-\li If x is a variable, \a arg[0] < \a i_z 
-\li If y is a variable, \a arg[1] < \a i_z 
 */
 template <class Base>
 inline void forward_binary_op_0(
 	size_t        i_z         ,
 	const addr_t* arg         ,
 	const Base*   parameter   ,
-	size_t        nc_taylor   , 
+	size_t        cap_order   , 
 	Base*         taylor      )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -599,19 +846,19 @@ is the value corresponding to x.
 If y is a parameter, \a parameter [ \a arg[1] ] 
 is the value corresponding to y.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\a taylor [ \a i_z * \a nc_taylor + k ] 
+\a taylor [ \a i_z * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to z.
 \n
-If x is a variable, \a taylor [ \a arg[0] * \a nc_taylor + k ] 
+If x is a variable, \a taylor [ \a arg[0] * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to x.
 \n
-If y is a variable, \a taylor [ \a arg[1] * \a nc_taylor + k ] 
+If y is a variable, \a taylor [ \a arg[1] * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to y.
 
@@ -654,7 +901,7 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li NumRes(op) == 1
 \li \a If x is a variable, arg[0] < \a i_z 
 \li \a If y is a variable, arg[1] < \a i_z 
-\li \a d < \a nc_taylor
+\li \a d < \a cap_order
 \li \a d < \a nc_partial
 */
 template <class Base>
@@ -663,7 +910,7 @@ inline void reverse_binary_op(
 	size_t      i_z          ,
 	addr_t*     arg          ,
 	const Base* parameter    ,
-	size_t      nc_taylor    , 
+	size_t      cap_order    , 
 	const Base* taylor       ,
 	size_t      nc_partial   ,
 	Base*       partial      )
@@ -714,25 +961,25 @@ is the value corresponding to x.
 If y is a parameter, \a parameter [ \a arg[1] ] 
 is the value corresponding to y.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
 \b Input: If x is a variable, 
-<code>taylor [ arg[0] * nc_taylor + k ]</code> 
+<code>taylor [ arg[0] * cap_order + k ]</code> 
 for k = 0 , ... , q,
 is the k-th order Taylor coefficient corresponding to x.
 \n
 \b Input: If y is a variable, 
-<code>taylor [ arg[1] * nc_taylor + k ]</code> 
+<code>taylor [ arg[1] * cap_order + k ]</code> 
 for k = 0 , ... , q
 is the k-th order Taylor coefficient corresponding to y.
 \n
-\b Input: <code>taylor [ (i_z-2+j) * nc_taylor + k ]</code>,
+\b Input: <code>taylor [ (i_z-2+j) * cap_order + k ]</code>,
 for j = 0, 1, 2 , for k = 0 , ... , p-1,
 is the k-th order Taylor coefficient corresponding to z_j.
 \n
-\b Output: <code>taylor [ (i_z-2+j) * nc_taylor + k ]</code>, 
+\b Output: <code>taylor [ (i_z-2+j) * cap_order + k ]</code>, 
 is the k-th order Taylor coefficient corresponding to z_j.
 
 \par Checked Assertions
@@ -740,7 +987,7 @@ is the k-th order Taylor coefficient corresponding to z_j.
 \li NumRes(op) == 3
 \li If x is a variable, arg[0] < i_z - 2 
 \li If y is a variable, arg[1] < i_z - 2
-\li q < nc_taylor
+\li q < cap_order
 \li p <= q
 */
 template <class Base>
@@ -750,7 +997,114 @@ inline void forward_pow_op(
 	size_t        i_z        ,
 	const addr_t* arg        ,
 	const Base*   parameter  ,
-	size_t        nc_taylor  , 
+	size_t        cap_order  , 
+	Base*         taylor     )
+{
+	// This routine is only for documentaiton, it should not be used
+	CPPAD_ASSERT_UNKNOWN( false );
+}
+/*!
+Prototype for multiple direction forward mode z = pow(x, y) (not used).
+
+\tparam Base
+base type for the operator; i.e., this operation was recorded
+using AD< \a Base > and computations by this routine are done using type 
+\a Base.
+
+\param q
+order of the Taylor coefficient that we are computing.
+
+\param r
+is the number of Taylor coefficient directions that we are computing
+
+\param i_z
+variable index corresponding to the last (primary) result for this operation; 
+i.e. the row index in \a taylor corresponding to z. 
+Note that there are three results for this operation,
+below they are referred to as z_0, z_1, z_2 and correspond to
+\verbatim
+	z_0 = log(x)
+	z_1 = z0 * y
+	z_2 = exp(z1)
+\endverbatim
+It follows that the final result is equal to z; i.e., z = z_2 = pow(x, y). 
+
+\param arg
+\a arg[0]
+index corresponding to the left operand for this operator;
+i.e. the index corresponding to x.
+\n
+\a arg[1]
+index corresponding to the right operand for this operator;
+i.e. the index corresponding to y.
+
+\param parameter
+If x is a parameter, \a parameter [ \a arg[0] ] 
+is the value corresponding to x.
+\n
+If y is a parameter, \a parameter [ \a arg[1] ] 
+is the value corresponding to y.
+
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
+
+\par tpv
+We use the notation
+<code>tpv = (cap_order-1) * r + 1</code>
+which is the number of Taylor coefficients per variable
+
+\param taylor
+\b Input: If x is a variable, 
+<code>taylor [ arg[0] * tpv + 0 ]</code> 
+is the zero order coefficient corresponding to x and
+<code>taylor [ arg[0] * tpv + (k-1)*r+1+ell ]</code> 
+for k = 1 , ... , q,
+ell = 0 , ... , r-1,
+is the k-th order Taylor coefficient corresponding to x
+for the ell-th direction.
+\n
+\n
+\b Input: If y is a variable, 
+<code>taylor [ arg[1] * tpv + 0 ]</code> 
+is the zero order coefficient corresponding to y and
+<code>taylor [ arg[1] * tpv + (k-1)*r+1+ell ]</code> 
+for k = 1 , ... , q,
+ell = 0 , ... , r-1,
+is the k-th order Taylor coefficient corresponding to y
+for the ell-th direction.
+\n
+\n
+\b Input: 
+<code>taylor [ (i_z-2+j) * tpv + 0 ]</code>,
+is the zero order coefficient corresponding to z_j and
+<code>taylor [ (i_z-2+j) * tpv + (k-1)*r+1+ell ]</code>,
+for j = 0, 1, 2 , k = 0 , ... , q-1, ell = 0, ... , r-1,
+is the k-th order Taylor coefficient corresponding to z_j
+for the ell-th direction.
+\n
+\n
+\b Output: 
+<code>taylor [ (i_z-2+j) * tpv + (q-1)*r+1+ell ]</code>,
+for j = 0, 1, 2 , ell = 0, ... , r-1,
+is the q-th order Taylor coefficient corresponding to z_j
+for the ell-th direction.
+
+\par Checked Assertions
+\li NumArg(op) == 2
+\li NumRes(op) == 3
+\li If x is a variable, arg[0] < i_z - 2 
+\li If y is a variable, arg[1] < i_z - 2
+\li 0 < q
+\li q < cap_order
+*/
+template <class Base>
+inline void forward_pow_op_dir(
+	size_t        q          ,
+	size_t        r          ,
+	size_t        i_z        ,
+	const addr_t* arg        ,
+	const Base*   parameter  ,
+	size_t        cap_order  , 
 	Base*         taylor     )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -792,17 +1146,17 @@ is the value corresponding to x.
 If y is a parameter, \a parameter [ \a arg[1] ] 
 is the value corresponding to y.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\b Input: If x is a variable, \a taylor [ \a arg[0] * \a nc_taylor + 0 ] 
+\b Input: If x is a variable, \a taylor [ \a arg[0] * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to x.
 \n
-\b Input: If y is a variable, \a taylor [ \a arg[1] * \a nc_taylor + 0 ] 
+\b Input: If y is a variable, \a taylor [ \a arg[1] * \a cap_order + 0 ] 
 is the k-th order Taylor coefficient corresponding to y.
 \n
-\b Output: \a taylor [ \a (i_z - 2 + j) * \a nc_taylor + 0 ] 
+\b Output: \a taylor [ \a (i_z - 2 + j) * \a cap_order + 0 ] 
 is the zero order Taylor coefficient corresponding to z_j.
 
 \par Checked Assertions
@@ -816,7 +1170,7 @@ inline void forward_pow_op_0(
 	size_t        i_z        ,
 	const addr_t* arg        ,
 	const Base*   parameter  ,
-	size_t        nc_taylor  , 
+	size_t        cap_order  , 
 	Base*         taylor     )
 {
 	// This routine is only for documentaiton, it should not be used
@@ -869,19 +1223,19 @@ is the value corresponding to x.
 If y is a parameter, \a parameter [ \a arg[1] ] 
 is the value corresponding to y.
 
-\param nc_taylor
-number of colums in the matrix containing all the Taylor coefficients.
+\param cap_order
+maximum number of orders that will fit in the \c taylor array.
 
 \param taylor
-\a taylor [ \a (i_z - 2 + j) * \a nc_taylor + k ] 
+\a taylor [ \a (i_z - 2 + j) * \a cap_order + k ] 
 for j = 0, 1, 2 and k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to z_j.
 \n
-If x is a variable, \a taylor [ \a arg[0] * \a nc_taylor + k ] 
+If x is a variable, \a taylor [ \a arg[0] * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to x.
 \n
-If y is a variable, \a taylor [ \a arg[1] * \a nc_taylor + k ] 
+If y is a variable, \a taylor [ \a arg[1] * \a cap_order + k ] 
 for k = 0 , ... , \a d
 is the k-th order Taylor coefficient corresponding to y.
 
@@ -924,7 +1278,7 @@ may be used as work space; i.e., may change in an unspecified manner.
 \li NumRes(op) == 3
 \li \a If x is a variable, arg[0] < \a i_z - 2
 \li \a If y is a variable, arg[1] < \a i_z - 2
-\li \a d < \a nc_taylor
+\li \a d < \a cap_order
 \li \a d < \a nc_partial
 */
 template <class Base>
@@ -933,7 +1287,7 @@ inline void reverse_pow_op(
 	size_t      i_z          ,
 	addr_t*     arg          ,
 	const Base* parameter    ,
-	size_t      nc_taylor    , 
+	size_t      cap_order    , 
 	const Base* taylor       ,
 	size_t      nc_partial   ,
 	Base*       partial      )

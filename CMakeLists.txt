@@ -16,7 +16,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # cppad_version is used by set_version.sh to get the version number.
-SET(cppad_version      "20130918" )
+SET(cppad_version      "20141230" )
 SET(cppad_url          "http://www.coin-or.org/CppAD" )
 SET(cppad_description  "Differentiation of C++ Algorithms" )
 
@@ -63,6 +63,9 @@ INCLUDE(cmake/add_cppad_cxx_flags.cmake)
 #
 # sources_libs_define(prefix_name sources libs define)
 INCLUDE(cmake/sources_libs_define.cmake)
+#
+# check_source_runs(source variable)
+INCLUDE(cmake/check_source_runs.cmake)
 # =============================================================================
 # command line arguments
 # =============================================================================
@@ -171,14 +174,14 @@ MESSAGE(STATUS "cppad_cxx_flags_sacado = ${cppad_cxx_flags_sacado}")
 # -----------------------------------------------------------------------------
 # cppad_cxx_flags_skip_eigen
 STRING(REGEX REPLACE 
-	"(.*)-Wshadow(.*)"         "\\1 \\2" 
+	"(.*)-Wshadow(.*)"         "\\1-Wno-shadow\\2" 
 	cppad_cxx_flags_eigen "${cppad_cxx_flags}"
 )
 MESSAGE(STATUS "cppad_cxx_flags_eigen = ${cppad_cxx_flags_eigen}")
 # -----------------------------------------------------------------------------
 # cppad_cxx_flags_skip_fadbad
 STRING(REGEX REPLACE 
-	"(.*)-Wshadow(.*)"         "\\1 \\2" 
+	"(.*)-Wshadow(.*)"         "\\1-Wno-shadow\\2" 
 	cppad_cxx_flags_fadbad "${cppad_cxx_flags}"
 )
 MESSAGE(STATUS "cppad_cxx_flags_fadbad = ${cppad_cxx_flags_fadbad}")
@@ -346,7 +349,7 @@ ADD_CUSTOM_TARGET(check DEPENDS ${check_depends})
 # Note a trailing / in the source directory name drops the source directory
 # name during the copy.
 #
-# During install copy all ithe cppad include files to 
+# During install copy all the cppad include files to 
 # ${cppad_abs_includedir}/cppad  
 INSTALL( 
 	DIRECTORY "cppad/" 
@@ -359,9 +362,8 @@ INSTALL(
 	FILES_MATCHING PATTERN "*.hpp"
 )
 INSTALL( 
-	DIRECTORY "cppad/local" 
-	DESTINATION ${cppad_abs_includedir}/cppad/local
-	FILES_MATCHING PATTERN "cppad_colpack.cpp"
+	FILES "cppad/local/cppad_colpack.cpp"
+	DESTINATION ${cppad_abs_datadir}/cppad
 )
 #
 # During install copy doc direcrory to cppad_abs_docdir/cppad

@@ -3,7 +3,7 @@
 # define CPPAD_PRINT_OP_INCLUDED
 
 /* --------------------------------------------------------------------------
-CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-11 Bradley M. Bell
+CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-14 Bradley M. Bell
 
 CppAD is distributed under multiple licenses. This distribution is under
 the terms of the 
@@ -35,10 +35,6 @@ using AD< \a Base > and computations by this routine are done using type
 \param s_out
 the results are printed on this output stream.
 
-\param i_z
-is the index of the next variable on the tape
-(only used for error checking).
-
 \param arg
 \a arg[0] & 1
 \n
@@ -52,7 +48,7 @@ If this is zero, \a var is a parameter. Otherwise it is a variable.
 \a arg[1]
 \n
 If \a pos is a parameter, <code>parameter[arg[1]]</code> is its value.
-Othwise <code>taylor[ arg[1] * nc_taylor + 0 ]</code> is the zero
+Othwise <code>taylor[ arg[1] * cap_order + 0 ]</code> is the zero
 order Taylor coefficient for \a pos.
 \n
 \n
@@ -65,7 +61,7 @@ if \a pos is not a positive value.
 \a arg[3]
 \n
 If \a var is a parameter, <code>parameter[arg[3]]</code> is its value.
-Othwise <code>taylor[ arg[3] * nc_taylor + 0 ]</code> is the zero
+Othwise <code>taylor[ arg[3] * cap_order + 0 ]</code> is the zero
 order Taylor coefficient for \a var.
 \n
 \n
@@ -89,7 +85,7 @@ is the total number of values in the \a parameter vector
 \param parameter
 Contains the value of parameters.
 
-\param nc_taylor
+\param cap_order
 number of colums in the matrix containing all the Taylor coefficients.
 
 \param taylor
@@ -100,19 +96,18 @@ Contains the value of variables.
 \li NumRes(PriOp)  == 0
 \li text          !=  CPPAD_NULL
 \li arg[1]         <  num_text
-\li if \a pos is a variable, arg[1] < i_z, otherwise arg[1] < num_par
-\li if \a var is a variable, arg[3] < i_z, otherwise arg[3] < num_par
+\li if \a pos is a parameter, arg[1] < num_par
+\li if \a var is a parameter, arg[3] < num_par
 */
 template <class Base>
 inline void forward_pri_0(
 	std::ostream& s_out       ,
-	size_t        i_z         ,
 	const addr_t* arg         ,
 	size_t        num_text    ,
 	const char*   text        ,
 	size_t        num_par     ,
 	const Base*   parameter   ,
-	size_t        nc_taylor   ,
+	size_t        cap_order   ,
 	const Base*   taylor      )
 {	Base pos, var;
 	const char* before;
@@ -121,8 +116,7 @@ inline void forward_pri_0(
 
 	// pos
 	if( arg[0] & 1 )
-	{	CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) <= i_z );
-		pos = taylor[ arg[1] * nc_taylor + 0 ];
+	{	pos = taylor[ arg[1] * cap_order + 0 ];
 	}
 	else
 	{	CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < num_par );
@@ -135,8 +129,7 @@ inline void forward_pri_0(
 
 	// var
 	if( arg[0] & 2 )
-	{	CPPAD_ASSERT_UNKNOWN( size_t(arg[3]) <= i_z );
-		var = taylor[ arg[3] * nc_taylor + 0 ];
+	{	var = taylor[ arg[3] * cap_order + 0 ];
 	}
 	else
 	{	CPPAD_ASSERT_UNKNOWN( size_t(arg[3]) < num_par );

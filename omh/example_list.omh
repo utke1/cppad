@@ -112,7 +112,8 @@ $rref check_for_nan.cpp$$
 $rref check_numeric_type.cpp$$
 $rref check_simple_vector.cpp$$
 $rref checkpoint.cpp$$
-$rref colpack.cpp$$
+$rref colpack_hes.cpp$$
+$rref colpack_jac.cpp$$
 $rref compare_change.cpp$$
 $rref compare.cpp$$
 $rref complex_poly.cpp$$
@@ -137,6 +138,7 @@ $rref for_one.cpp$$
 $rref for_sparse_jac.cpp$$
 $rref for_two.cpp$$
 $rref forward.cpp$$
+$rref forward_dir.cpp$$
 $rref forward_order.cpp$$
 $rref fun_assign.cpp$$
 $rref fun_check.cpp$$
@@ -181,7 +183,6 @@ $rref multi_newton_work.cpp$$
 $rref nan.cpp$$
 $rref near_equal.cpp$$
 $rref near_equal_ext.cpp$$
-$rref not_complex_ad.cpp$$
 $rref number_skip.cpp$$
 $rref numeric_type.cpp$$
 $rref ode_err_control.cpp$$

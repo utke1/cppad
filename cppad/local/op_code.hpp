@@ -24,7 +24,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file op_code.hpp
 Defines the OpCode enum type and functions related to it.
 
@@ -46,6 +45,7 @@ operands have type AD< \a Base > use the following convention for thier endings:
 For example, AddpvOp represents the addition operator where the left
 operand is a parameter and the right operand is a variable.
 */
+// alphabetical order is checked by bin/check_op_code.sh
 enum OpCode {
 	AbsOp,    //  abs(variable)
 	AcosOp,   // asin(variable)
@@ -90,6 +90,7 @@ enum OpCode {
 	DivvpOp,  //      variable   / parameter
 	DivvvOp,  //      variable   / variable
 	EndOp,    //  used to mark the end of the tape
+	ErfOp,    //  erf(variable)
 	ExpOp,    //  exp(variable)
 	InvOp,    //                             independent variable
 	LdpOp,    //    z[parameter]
@@ -131,9 +132,16 @@ enum OpCode {
 // at the end of this list and only at the end of this list.
 
 /*!
-Table containing number of arguments for the corresponding operator.
+Number of arguments for a specified operator.
 
-The i-th element in this table specifes the number of arguments stored for each
+\return
+Number of arguments corresponding to the specified operator.
+
+\param op 
+Operator for which we are fetching the number of arugments.
+
+\par NumArgTable
+this table specifes the number of arguments stored for each
 occurance of the operator that is the i-th value in the OpCode enum type.
 For example, for the first three OpCode enum values we have
 \verbatim
@@ -144,72 +152,61 @@ AddpvOp  1                2  indices of parameter and variable we are adding
 \endverbatim
 Note that the meaning of the arguments depends on the operator.
 */
-const size_t NumArgTable[] = {
-	1, // AbsOp
-	1, // AcosOp
-	2, // AddpvOp
-	2, // AddvvOp
-	1, // AsinOp
-	1, // AtanOp
-	1, // BeginOp  offset first real argument to have index 1
-	6, // CExpOp
-	4, // ComOp
-	1, // CosOp
-	1, // CoshOp
-	0, // CSkipOp  (actually has a variable number of arguments, not zero)
-	0, // CSumOp   (actually has a variable number of arguments, not zero)
-	2, // DisOp
-	2, // DivpvOp
-	2, // DivvpOp
-	2, // DivvvOp
-	0, // EndOp
-	1, // ExpOp
-	0, // InvOp
-	3, // LdpOp
-	3, // LdvOp
-	1, // LogOp
-	2, // MulpvOp
-	2, // MulvvOp
-	1, // ParOp
-	2, // PowpvOp
-	2, // PowvpOp
-	2, // PowvvOp
-	5, // PriOp
-	1, // SignOp
-	1, // SinOp
-	1, // SinhOp
-	1, // SqrtOp
-	3, // StppOp
-	3, // StpvOp
-	3, // StvpOp
-	3, // StvvOp
-	2, // SubpvOp
-	2, // SubvpOp
-	2, // SubvvOp
-	1, // TanOp
-	1, // TanhOp
-	4, // UserOp
-	1, // UsrapOp
-	1, // UsravOp
-	1, // UsrrpOp
-	0  // UsrrvOp
-};
-
-/*!
-Fetch the number of arguments for a specified operator.
-
-\return
-Number of arguments corresponding to the specified operator.
-
-\param op 
-Operator for which we are fetching the number of arugments.
-
-- Check that argument taple size equal to NumberOp
-- Check that \c CPPAD_OP_CODE_TYPE can support all the operator codes.
-- Check that \c op is a valid operator value.
-*/
 inline size_t NumArg( OpCode op)
 {	CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
+
+	// agreement with OpCode is checked by bin/check_op_code.sh
+	static const size_t NumArgTable[] = {
+		1, // AbsOp
+		1, // AcosOp
+		2, // AddpvOp
+		2, // AddvvOp
+		1, // AsinOp
+		1, // AtanOp
+		1, // BeginOp  offset first real argument to have index 1
+		6, // CExpOp
+		4, // ComOp
+		1, // CosOp
+		1, // CoshOp
+		0, // CSkipOp  (actually has a variable number of arguments, not zero)
+		0, // CSumOp   (actually has a variable number of arguments, not zero)
+		2, // DisOp
+		2, // DivpvOp
+		2, // DivvpOp
+		2, // DivvvOp
+		0, // EndOp
+		3, // ErfOp
+		1, // ExpOp
+		0, // InvOp
+		3, // LdpOp
+		3, // LdvOp
+		1, // LogOp
+		2, // MulpvOp
+		2, // MulvvOp
+		1, // ParOp
+		2, // PowpvOp
+		2, // PowvpOp
+		2, // PowvvOp
+		5, // PriOp
+		1, // SignOp
+		1, // SinOp
+		1, // SinhOp
+		1, // SqrtOp
+		3, // StppOp
+		3, // StpvOp
+		3, // StvpOp
+		3, // StvvOp
+		2, // SubpvOp
+		2, // SubvpOp
+		2, // SubvvOp
+		1, // TanOp
+		1, // TanhOp
+		4, // UserOp
+		1, // UsrapOp
+		1, // UsravOp
+		1, // UsrrpOp
+		0  // UsrrvOp
+	};
 # ifndef NDEBUG
 	// only do these checks once to save time
 	static bool first = true;
@@ -230,9 +227,13 @@ inline size_t NumArg( OpCode op)
 }
 
 /*!
-Number of variables resulting from the corresponding operation.
+Number of variables resulting from the specified operation.
 
-The i-th element in this table specifes the number of varibles for each
+\param op
+Operator for which we are fecching the number of results.
+
+\par NumResTable
+table specifes the number of varibles that result for each
 occurance of the operator that is the i-th value in the OpCode enum type.
 For example, for the first three OpCode enum values we have
 \verbatim
@@ -242,70 +243,63 @@ AcosOp   1                2  acos(x) and sqrt(1-x*x) are required for this op
 AddpvOp  1                1  variable that is the result of the addition
 \endverbatim
 */
-// alphabetical order (ignoring the Op at the end)
-const size_t NumResTable[] = {
-	1, // AbsOp
-	2, // AcosOp
-	1, // AddpvOp
-	1, // AddvvOp
-	2, // AsinOp
-	2, // AtanOp
-	1, // BeginOp  offsets first variable to have index one (not zero)
-	1, // CExpOp
-	0, // ComOp
-	2, // CosOp
-	2, // CoshOp
-	0, // CSkipOp
-	1, // CSumOp
-	1, // DisOp
-	1, // DivpvOp
-	1, // DivvpOp
-	1, // DivvvOp
-	0, // EndOp
-	1, // ExpOp
-	1, // InvOp
-	1, // LdpOp
-	1, // LdvOp
-	1, // LogOp
-	1, // MulpvOp
-	1, // MulvvOp
-	1, // ParOp
-	3, // PowpvOp
-	3, // PowvpOp
-	3, // PowvvOp
-	0, // PriOp
-	1, // SignOp
-	2, // SinOp
-	2, // SinhOp
-	1, // SqrtOp
-	0, // StppOp
-	0, // StpvOp
-	0, // StvpOp
-	0, // StvvOp
-	1, // SubpvOp
-	1, // SubvpOp
-	1, // SubvvOp
-	2, // TanOp
-	2, // TanhOp
-	0, // UserOp
-	0, // UsrapOp
-	0, // UsravOp
-	0, // UsrrpOp
-	1, // UsrrvOp
-	0  // Last entry not used: avoids warning by g++ 4.3.2 when pycppad builds
-};
-
-/*!
-Fetch the number of variables resulting from the specified operation.
-
-\return
-number of variables resulting from the specified operator.
-
-\param op 
-Operator for which we are fetching the number of result variables.
-*/
 inline size_t NumRes(OpCode op)
-{	// check ensuring conversion to size_t is as expected
+{	CPPAD_ASSERT_FIRST_CALL_NOT_PARALLEL;
+
+	// agreement with OpCode is checked by bin/check_op_code.sh
+	static const size_t NumResTable[] = {
+		1, // AbsOp
+		2, // AcosOp
+		1, // AddpvOp
+		1, // AddvvOp
+		2, // AsinOp
+		2, // AtanOp
+		1, // BeginOp  offsets first variable to have index one (not zero)
+		1, // CExpOp
+		0, // ComOp
+		2, // CosOp
+		2, // CoshOp
+		0, // CSkipOp
+		1, // CSumOp
+		1, // DisOp
+		1, // DivpvOp
+		1, // DivvpOp
+		1, // DivvvOp
+		0, // EndOp
+		5, // ErfOp
+		1, // ExpOp
+		1, // InvOp
+		1, // LdpOp
+		1, // LdvOp
+		1, // LogOp
+		1, // MulpvOp
+		1, // MulvvOp
+		1, // ParOp
+		3, // PowpvOp
+		3, // PowvpOp
+		3, // PowvvOp
+		0, // PriOp
+		1, // SignOp
+		2, // SinOp
+		2, // SinhOp
+		1, // SqrtOp
+		0, // StppOp
+		0, // StpvOp
+		0, // StvpOp
+		0, // StvvOp
+		1, // SubpvOp
+		1, // SubvpOp
+		1, // SubvvOp
+		2, // TanOp
+		2, // TanhOp
+		0, // UserOp
+		0, // UsrapOp
+		0, // UsravOp
+		0, // UsrrpOp
+		1, // UsrrvOp
+		0  // Last entry not used: avoids g++ 4.3.2 warn when pycppad builds
+	};
+	// check ensuring conversion to size_t is as expected
 	CPPAD_ASSERT_UNKNOWN( size_t(NumberOp) == 
 		sizeof(NumResTable) / sizeof(NumResTable[0]) - 1
 	);
@@ -313,6 +307,79 @@ inline size_t NumRes(OpCode op)
 	CPPAD_ASSERT_UNKNOWN( size_t(op) < size_t(NumberOp) );
 
 	return NumResTable[op];
+}
+
+
+/*!
+Fetch the name for a specified operation.
+
+\return
+name of the specified operation.
+
+\param op 
+Operator for which we are fetching the name
+*/
+inline const char* OpName(OpCode op)
+{	// agreement with OpCode is checked by bin/check_op_code.sh
+	static const char *OpNameTable[] = {
+		"Abs"   ,
+		"Acos"  ,
+		"Addpv" ,
+		"Addvv" ,
+		"Asin"  ,
+		"Atan"  ,
+		"Begin" ,
+		"CExp"  ,
+		"Com"   ,
+		"Cos"   ,
+		"Cosh"  ,
+		"CSkip" ,
+		"CSum"  ,
+		"Dis"   ,
+		"Divpv" ,
+		"Divvp" ,
+		"Divvv" ,
+		"End"   ,
+		"Erf"   ,
+		"Exp"   ,
+		"Inv"   ,
+		"Ldp"   ,
+		"Ldv"   ,
+		"Log"   ,
+		"Mulpv" ,
+		"Mulvv" ,
+		"Par"   ,
+		"Powpv" ,
+		"Powvp" ,
+		"Powvv" ,
+		"Pri"   ,
+		"Sign"  ,
+		"Sin"   ,
+		"Sinh"  ,
+		"Sqrt"  ,
+		"Stpp"  ,
+		"Stpv"  ,
+		"Stvp"  ,
+		"Stvv"  ,
+		"Subpv" ,
+		"Subvp" ,
+		"Subvv" ,
+		"Tan"   ,
+		"Tanh"  ,
+		"User"  ,
+		"Usrap" ,
+		"Usrav" ,
+		"Usrrp" ,
+		"Usrrv"  
+	};
+	// check ensuring conversion to size_t is as expected
+	CPPAD_ASSERT_UNKNOWN( 
+		size_t(NumberOp) == sizeof(OpNameTable)/sizeof(OpNameTable[0]) 
+	);
+	// this test ensures that all indices are within the table
+	CPPAD_ASSERT_UNKNOWN( size_t(op) < size_t(NumberOp) );
+
+	return OpNameTable[op];
 }
 
 /*!
@@ -381,20 +448,15 @@ void printOpField(
 }
 
 /*!
-Prints a single operator, its operands, and the corresponding result values.
+Prints a single operator and its operands
 
 \tparam Base
 Is the base type for these AD< \a Base > operations.
 
-\tparam Value
-Determines the type of the values that we are printing.
-
 \param os
 is the output stream that the information is printed on.
 
-\param Rec
-2DO: change this name from Rec to play (becuase it is a player 
-and not a recorder).
+\param play
 Is the entire recording for the tape that this operator is in.
 
 \param i_op
@@ -402,7 +464,7 @@ is the index for the operator corresponding to this operation.
 
 \param i_var
 is the index for the variable corresponding to the result of this operation
-(ignored if NumRes(op) == 0).
+(if NumRes(op) > 0).
 
 \param op
 The operator code (OpCode) for this operation.
@@ -410,112 +472,33 @@ The operator code (OpCode) for this operation.
 \param ind
 is the vector of argument indices for this operation
 (must have NumArg(op) elements).
-
-\param nfz
-is the number of forward sweep calculated values of type Value
-that correspond to this operation
-(ignored if NumRes(op) == 0).
-
-\param fz
-points to the first forward calculated value
-that correspond to this operation
-(ignored if NumRes(op) == 0).
-
-\param nrz
-is the number of reverse sweep calculated values of type Value
-that correspond to this operation
-(ignored if NumRes(op) == 0).
-
-\param rz
-points to the first reverse calculated value
-that correspond to this operation
-(ignored if NumRes(op) == 0).
-
-\par 2DO
-print the operator index (in addition to the variables index).
 */
-template <class Base, class Value>
+template <class Base>
 void printOp(
-	std::ostream          &os     , 
-	const player<Base>   *Rec     ,
+	std::ostream&          os     , 
+	const player<Base>*    play   ,
 	size_t                 i_op   , 
 	size_t                 i_var  , 
 	OpCode                 op     ,
-	const addr_t          *ind    ,
-	size_t                 nfz    ,
-	const  Value          *fz     ,
-	size_t                 nrz    ,
-	const  Value          *rz     )
+	const addr_t*          ind    )
 {	size_t i;
-	
 	CPPAD_ASSERT_KNOWN(
 		! thread_alloc::in_parallel() ,
 		"cannot print trace of AD operations in parallel mode"
 	);
 	static const char *CompareOpName[] = 
 		{ "Lt", "Le", "Eq", "Ge", "Gt", "Ne" };
-	static const char *OpName[] = {
-		"Abs"   ,
-		"Acos"  ,
-		"Addpv" ,
-		"Addvv" ,
-		"Asin"  ,
-		"Atan"  ,
-		"Begin" ,
-		"CExp"  ,
-		"Com"   ,
-		"Cos"   ,
-		"Cosh"  ,
-		"CSkip" ,
-		"CSum"  ,
-		"Dis"   ,
-		"Divpv" ,
-		"Divvp" ,
-		"Divvv" ,
-		"End"   ,
-		"Exp"   ,
-		"Inv"   ,
-		"Ldp"   ,
-		"Ldv"   ,
-		"Log"   ,
-		"Mulpv" ,
-		"Mulvv" ,
-		"Par"   ,
-		"Powpv" ,
-		"Powvp" ,
-		"Powvv" ,
-		"Pri"   ,
-		"Sign"  ,
-		"Sin"   ,
-		"Sinh"  ,
-		"Sqrt"  ,
-		"Stpp"  ,
-		"Stpv"  ,
-		"Stvp"  ,
-		"Stvv"  ,
-		"Subpv" ,
-		"Subvp" ,
-		"Subvv" ,
-		"Tan"   ,
-		"Tanh"  ,
-		"User"  ,
-		"Usrap" ,
-		"Usrav" ,
-		"Usrrp" ,
-		"Usrrv"
-	};
-	CPPAD_ASSERT_UNKNOWN( 
-		size_t(NumberOp) == sizeof(OpName) / sizeof(OpName[0])
-	);
 
 	// print operator
 	printOpField(os,  "o=",      i_op,  5);
-	printOpField(os,  "v=",      i_var, 5);
+	if( NumRes(op) > 0 && op != BeginOp )
+		printOpField(os,  "v=",      i_var, 5);
+	else	printOpField(os,  "v=",      "",    5);
 	if( op == CExpOp || op == CSkipOp || op == ComOp )
-	{	printOpField(os, "", OpName[op], 5); 
+	{	printOpField(os, "", OpName(op), 5); 
 		printOpField(os, "", CompareOpName[ ind[0] ], 3);
 	}
-	else	printOpField(os, "", OpName[op], 8); 
+	else	printOpField(os, "", OpName(op), 8); 
 
 	// print other fields
 	size_t ncol = 5;
@@ -538,10 +521,10 @@ void printOp(
 		CPPAD_ASSERT_UNKNOWN(ind[1] != 0);
 		if( ind[1] & 1 )
 			printOpField(os, " vl=", ind[2], ncol);
-		else	printOpField(os, " pl=", Rec->GetPar(ind[2]), ncol);
+		else	printOpField(os, " pl=", play->GetPar(ind[2]), ncol);
 		if( ind[1] & 2 )
 			printOpField(os, " vr=", ind[3], ncol);
-		else	printOpField(os, " pr=", Rec->GetPar(ind[3]), ncol);
+		else	printOpField(os, " pr=", play->GetPar(ind[3]), ncol);
 		if( size_t(ind[4]) < 3 )
 		{	for(i = 0; i < size_t(ind[4]); i++)
 			 	printOpField(os, " ot=", ind[6+i], ncol);
@@ -573,7 +556,7 @@ void printOp(
 		ind[3+ind[0]+ind[1]] == ind[0] + ind[1]
 		*/
 		CPPAD_ASSERT_UNKNOWN( ind[3+ind[0]+ind[1]] == ind[0]+ind[1] );
-		printOpField(os, " pr=", Rec->GetPar(ind[2]), ncol);
+		printOpField(os, " pr=", play->GetPar(ind[2]), ncol);
 		for(i = 0; i < size_t(ind[0]); i++)
 			 printOpField(os, " +v=", ind[3+i], ncol);
 		for(i = 0; i < size_t(ind[1]); i++)
@@ -596,7 +579,7 @@ void printOp(
 		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 3 );
 		printOpField(os, "off=", ind[0], ncol);
 		printOpField(os, "idx=", ind[1], ncol);
-		printOpField(os, " pr=", Rec->GetPar(ind[2]), ncol);
+		printOpField(os, " pr=", play->GetPar(ind[2]), ncol);
 		break;
 
 		case StpvOp:
@@ -610,7 +593,7 @@ void printOp(
 		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 3 );
 		printOpField(os, "off=", ind[0], ncol);
 		printOpField(os, " vl=", ind[1], ncol);
-		printOpField(os, " pr=", Rec->GetPar(ind[2]), ncol);
+		printOpField(os, " pr=", play->GetPar(ind[2]), ncol);
 		break;
 
 		case StvvOp:
@@ -636,7 +619,7 @@ void printOp(
 		case PowpvOp:
 		case DivpvOp:
 		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 2 );
-		printOpField(os, " pl=", Rec->GetPar(ind[0]), ncol);
+		printOpField(os, " pl=", play->GetPar(ind[0]), ncol);
 		printOpField(os, " vr=", ind[1], ncol);
 		break;
 
@@ -645,7 +628,7 @@ void printOp(
 		case SubvpOp:
 		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 2 );
 		printOpField(os, " vl=", ind[0], ncol);
-		printOpField(os, " pr=", Rec->GetPar(ind[1]), ncol);
+		printOpField(os, " pr=", play->GetPar(ind[1]), ncol);
 		break;
 
 		case AbsOp:
@@ -667,11 +650,18 @@ void printOp(
 		printOpField(os, "  v=", ind[0], ncol);
 		break;
 
+		case ErfOp:
+		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 3 );
+		// ind[2] points to the parameter 0
+		// ind[3] points to the parameter 2 / sqrt(pi)
+		printOpField(os, "  v=", ind[0], ncol);
+		break;
+
 		case ParOp:
 		case UsrapOp:
 		case UsrrpOp:
 		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 1 );
-		printOpField(os, "  p=", Rec->GetPar(ind[0]), ncol);
+		printOpField(os, "  p=", play->GetPar(ind[0]), ncol);
 		break;
 
 		case UserOp:
@@ -688,15 +678,19 @@ void printOp(
 		CPPAD_ASSERT_NARG_NRES(op, 5, 0);
 		if( ind[0] & 1 )
 			printOpField(os, " v=", ind[1], ncol);
-		else	printOpField(os, " p=", Rec->GetPar(ind[1]), ncol);
-		os << "before=\"" << Rec->GetTxt(ind[2]) << "\"";
+		else	printOpField(os, " p=", play->GetPar(ind[1]), ncol);
+		os << "before=\"" << play->GetTxt(ind[2]) << "\"";
 		if( ind[0] & 2 )
 			printOpField(os, " v=", ind[3], ncol);
-		else	printOpField(os, " p=", Rec->GetPar(ind[3]), ncol);
-		os << "after=\"" << Rec->GetTxt(ind[4]) << "\"";
+		else	printOpField(os, " p=", play->GetPar(ind[3]), ncol);
+		os << "after=\"" << play->GetTxt(ind[4]) << "\"";
 		break;
 
 		case BeginOp:
+		// argument not used (created by independent)
+		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 1 );
+		break;
+
 		case EndOp:
 		case InvOp:
 		case UsrrvOp:
@@ -717,16 +711,16 @@ void printOp(
 		CPPAD_ASSERT_UNKNOWN( NumArg(op) == 6 );
 		if( ind[1] & 1 )
 			printOpField(os, " vl=", ind[2], ncol);
-		else	printOpField(os, " pl=", Rec->GetPar(ind[2]), ncol);
+		else	printOpField(os, " pl=", play->GetPar(ind[2]), ncol);
 		if( ind[1] & 2 )
 			printOpField(os, " vr=", ind[3], ncol);
-		else	printOpField(os, " pr=", Rec->GetPar(ind[3]), ncol);
+		else	printOpField(os, " pr=", play->GetPar(ind[3]), ncol);
 		if( ind[1] & 4 )
 			printOpField(os, " vt=", ind[4], ncol);
-		else	printOpField(os, " pt=", Rec->GetPar(ind[4]), ncol);
+		else	printOpField(os, " pt=", play->GetPar(ind[4]), ncol);
 		if( ind[1] & 8 )
 			printOpField(os, " vf=", ind[5], ncol);
-		else	printOpField(os, " pf=", Rec->GetPar(ind[5]), ncol);
+		else	printOpField(os, " pf=", play->GetPar(ind[5]), ncol);
 		break;
 
 		case ComOp:
@@ -737,24 +731,248 @@ void printOp(
 		else	printOpField(os, "res=", 0, ncol);
 		if( ind[1] & 2 )
 			printOpField(os, " vl=", ind[2], ncol);
-		else	printOpField(os, " pl=", Rec->GetPar(ind[2]), ncol);
+		else	printOpField(os, " pl=", play->GetPar(ind[2]), ncol);
 		if( ind[1] & 4 )
 			printOpField(os, " vr=", ind[3], ncol);
-		else	printOpField(os, " pr=", Rec->GetPar(ind[3]), ncol);
+		else	printOpField(os, " pr=", play->GetPar(ind[3]), ncol);
 		break;
 
 		default:
 		CPPAD_ASSERT_UNKNOWN(0);
 	}
+}
+
+/*!
+Prints the result values correspnding to an operator.
+
+\tparam Base
+Is the base type for these AD< \a Base > operations.
+
+\tparam Value
+Determines the type of the values that we are printing.
+
+\param os
+is the output stream that the information is printed on.
+
+\param nfz
+is the number of forward sweep calculated values of type Value
+that correspond to this operation
+(ignored if NumRes(op) == 0).
+
+\param fz
+points to the first forward calculated value
+that correspond to this operation
+(ignored if NumRes(op) == 0).
+
+\param nrz
+is the number of reverse sweep calculated values of type Value
+that correspond to this operation
+(ignored if NumRes(op) == 0).
+
+\param rz
+points to the first reverse calculated value
+that correspond to this operation
+(ignored if NumRes(op) == 0).
+*/
+template <class Value>
+void printOpResult(
+	std::ostream          &os     , 
+	size_t                 nfz    ,
+	const  Value          *fz     ,
+	size_t                 nrz    ,
+	const  Value          *rz     )
+{
 	size_t k;
-	if( NumRes(op) > 0 && (op != BeginOp) )
-	{ 
-		for(k = 0; k < nfz; k++)
-			std::cout << "| fz[" << k << "]=" << fz[k];
-		for(k = 0; k < nrz; k++)
-			std::cout << "| rz[" << k << "]=" << rz[k];
+	for(k = 0; k < nfz; k++)
+		os << "| fz[" << k << "]=" << fz[k];
+	for(k = 0; k < nrz; k++)
+		os << "| rz[" << k << "]=" << rz[k];
+}
+
+/*!
+If NDEBUG is not defined, assert that arguments come before result.
+
+\param op
+Operator for which we are checking order.
+All the operators are checked except for those of the form UserOp or Usr..Op.
+
+\param result
+is the variable index for the result.
+
+\param arg
+is a vector of lenght NumArg(op) pointing to the arguments
+for this operation.
+*/
+inline void assert_arg_before_result(
+	OpCode op, const addr_t* arg, size_t result
+)
+{
+	switch( op )
+	{
+
+		// These cases are not included below
+		case UserOp:
+		case UsrapOp:
+		case UsravOp:
+		case UsrrpOp:
+		case UsrrvOp:
+		break;
+		// ------------------------------------------------------------------
+
+		// 0 arguments
+		case CSkipOp:
+		case CSumOp:
+		case EndOp:
+		case InvOp:
+		break;
+		// ------------------------------------------------------------------
+
+		// 1 argument, but is not used
+		case BeginOp:
+		break;
+
+		// 1 argument , 1 result
+		case AbsOp:
+		case ExpOp:
+		case LogOp:
+		case ParOp:
+		case SignOp:
+		case SqrtOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < result );
+		break;
+
+		// 1 argument, 2 results
+		case AcosOp:
+		case AsinOp:
+		case AtanOp:
+		case CosOp:
+		case CoshOp:
+		case SinOp:
+		case SinhOp:
+		case TanOp:
+		case TanhOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) + 1 < result );
+		break;
+
+		// 1 argument, 5 results
+		case ErfOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) + 4 < result );
+		break;
+		// ------------------------------------------------------------------
+
+		// 2 arguments (both variables), 1 results
+		case AddvvOp:
+		case DivvvOp:
+		case MulvvOp:
+		case SubvvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < result );
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < result );
+		break;
+
+		// 2 arguments (first variables), 1 results
+		case DivvpOp:
+		case SubvpOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) < result );
+		break;
+
+		// 2 arguments (second variables), 1 results
+		case AddpvOp:
+		case DisOp:
+		case DivpvOp:
+		case MulpvOp:
+		case SubpvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < result );
+		break;
+
+		// 2 arguments (both variables), 3 results
+		case PowvvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) + 2 < result );
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) + 2 < result );
+		break;
+
+		// 2 arguments (first variable), 3 results
+		case PowvpOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[0]) + 2 < result );
+		break;
+
+		// 2 arguments (second variable), 3 results
+		case PowpvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) + 2 < result );
+		break;
+		// ------------------------------------------------------------------
+
+		// 3 arguments, none variables
+		case LdpOp:
+		case StppOp:
+		break;
+
+		// 3 arguments, second variable, 1 result
+		case LdvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) < result );
+		break;
+		
+		// 3 arguments, third variable, no result
+		case StpvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[2]) <= result );
+		break;
+
+		// 3 arguments, second variable, no result
+		case StvpOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) <= result );
+		break;
+
+		// 3 arguments, second and third variable, no result
+		case StvvOp:
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) <= result );
+		CPPAD_ASSERT_UNKNOWN( size_t(arg[2]) <= result );
+		break;
+		// ------------------------------------------------------------------
+
+		// 4 arguments, no result
+		case ComOp:
+		if( arg[1] & 2 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[2]) <= result );
+		}
+		if( arg[1] & 4 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[3]) <= result );
+		}
+		break;
+		// ------------------------------------------------------------------
+
+		// 5 arguments, no result
+		case PriOp:
+		if( arg[0] & 1 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[1]) <= result );
+		}
+		if( arg[0] & 2 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[3]) <= result );
+		}
+		break;
+		// ------------------------------------------------------------------
+
+		// 6 arguments, 1 result
+		case CExpOp:
+		if( arg[1] & 1 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[2]) < result );
+		}
+		if( arg[1] & 2 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[3]) < result );
+		}
+		if( arg[1] & 4 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[4]) < result );
+		}
+		if( arg[1] & 8 )
+		{	CPPAD_ASSERT_UNKNOWN( size_t(arg[5]) < result );
+		}
+		break;
+		// ------------------------------------------------------------------
+
+		default:
+		CPPAD_ASSERT_UNKNOWN(false);
+		break;
+
 	}
-	std::cout << std::endl;
+	return;
 }
 
 } // END_CPPAD_NAMESPACE

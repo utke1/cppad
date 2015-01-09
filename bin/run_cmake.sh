@@ -23,14 +23,46 @@ echo_eval() {
 }
 # -----------------------------------------------
 verbose='no'
-testvector='boost'
+standard='c++11'
 debug_speed='no'
 profile_speed='no'
+clang='no'
+testvector='boost'
 while [ "$1" != "" ]
 do
-	if [ "$1" == '--verbose' ]
+	if [ "$1" == '--help' ]
+	then
+		cat << EOF
+usage: bin/run_cmake.sh: \\
+	[--help] \\
+	[--verbose] \\
+	[--c++98] \\
+	[--debug_speed] \\
+	[--profile_speed] \\
+	[--clang ] \\
+	[--<package>_vector]
+The --help option just prints this message and exits.
+The value <package> above must be one of: cppad, boost, or eigen.
+
+EOF
+		exit 0
+	elif [ "$1" == '--verbose' ]
 	then
 		verbose='yes'
+	elif [ "$1" == '--c++98' ]
+	then
+		standard='c++98'
+	elif [ "$1" == '--debug_speed' ]
+	then
+		debug_speed='yes'
+		profile_speed='no'
+	elif [ "$1" == '--profile_speed' ]
+	then
+		profile_speed='yes'
+		debug_speed='no'
+	elif [ "$1" == '--clang' ]
+	then
+		clang='yes'
 	elif [ "$1" == '--cppad_vector' ]
 	then
 		testvector='cppad'
@@ -40,19 +72,8 @@ do
 	elif [ "$1" == '--eigen_vector' ]
 	then
 		testvector='eigen'
-	elif [ "$1" == '--debug_speed' ]
-	then
-		debug_speed='yes'
-		profile_speed='no'
-	elif [ "$1" == '--profile_speed' ]
-	then
-		profile_speed='yes'
-		debug_speed='no'
 	else
-		options='[--verbose] [--<package>_vector]'
-		options="$options [--debug_speed] [--profile_speed']"
-		echo "usage: bin/run_cmake.sh: $options"
-		echo 'where <package> is cppad, boost, or eigen'
+		echo "$1 is an invalid option, try bin/run_cmake.sh --help"
 		exit 1
 	fi
 	shift
@@ -112,7 +133,7 @@ then
 fi
 #
 # {package}_prefix
-for package in adolc colpack eigen ipopt fadbad sacado
+for package in fadbad colpack adolc eigen ipopt sacado
 do
 	dir=$HOME/prefix/$package
 	if [ -d "$dir" ]
@@ -122,18 +143,26 @@ do
 done
 #
 # cppad_cxx_flags
-cmake_args="$cmake_args -D cppad_cxx_flags='-Wall -pedantic-errors -std=c++11'"
+cppad_cxx_flags="-Wall -pedantic-errors -std=$standard"
 if [ "$testvector" != 'eigen' ]
 then
- 	cmake_args="$cmake_args -Wshadow"
+ 	cppad_cxx_flags="$cppad_cxx_flags -Wshadow"
+fi
+cmake_args="$cmake_args -D cppad_cxx_flags='$cppad_cxx_flags'"
+#
+# clang
+if [ "$clang" == 'yes' ]
+then
+	cmake_args="$cmake_args -D CMAKE_C_COMPILER=clang"
+	cmake_args="$cmake_args -D CMAKE_CXX_COMPILER=clang++"
 fi
 #
 # simple options
-cmake_args="$cmake_args -D cppad_implicit_ctor_from_any_type_from_any_type=NO"
+cmake_args="$cmake_args -D cppad_implicit_ctor_from_any_type=NO"
 cmake_args="$cmake_args -D cppad_sparse_list=YES"
 cmake_args="$cmake_args -D cppad_testvector=$testvector"
-cmake_args="$cmake_args -D cppad_tape_id_type='int'"
-cmake_args="$cmake_args -D cppad_tape_addr_type=int"
+cmake_args="$cmake_args -D cppad_tape_id_type='int32_t'"
+cmake_args="$cmake_args -D cppad_tape_addr_type=int32_t"
 cmake_args="$cmake_args -D cppad_max_num_threads=48"
 #
 echo_eval cmake $cmake_args ..

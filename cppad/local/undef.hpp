@@ -1,4 +1,4 @@
-/* $Id$ */
+// $Id:$
 # ifndef CPPAD_UNDEF_INCLUDED
 # define CPPAD_UNDEF_INCLUDED
 
@@ -27,6 +27,7 @@ Preprecessor definitions that presist after cppad/cppad.hpp is included:
 # undef CPPAD_BOOL_UNARY          in user api
 # undef CPPAD_DISCRETE_FUNCTION   in user api
 # undef CPPAD_EIGENVECTOR         in user api
+# undef CPPAD_COMPILER_HAS_ERF  in user api
 # undef CPPAD_INTERNAL_SPARSE_SET in user api
 # undef CPPAD_MAX_NUM_THREADS     in user api
 # undef CPPAD_NULL                in user api
@@ -58,6 +59,7 @@ Preprecessor definitions that presist after cppad/cppad.hpp is included:
 // Preprecessor definitions that do not presist 
 # undef CPPAD_ASSERT_NARG_NRES
 # undef CPPAD_ASSERT_NOT_PARALLEL
+# undef CPPAD_ASSERT_ARG_BEFORE_RESULT
 # undef CPPAD_BOOSTVECTOR
 # undef CPPAD_COND_EXP
 # undef CPPAD_COND_EXP_BASE_REL
@@ -68,6 +70,7 @@ Preprecessor definitions that presist after cppad/cppad.hpp is included:
 # undef CPPAD_FOLD_BOOL_VALUED_BINARY_OPERATOR
 # undef CPPAD_FOR_JAC_SWEEP_TRACE
 # undef CPPAD_HAS_COLPACK
+# undef CPPAD_HAS_CSTDINT_8_TO_64
 # undef CPPAD_HAS_RVALUE
 # undef CPPAD_HAS_GETTIMEOFDAY
 # undef CPPAD_HAS_NULLPTR
@@ -78,7 +81,7 @@ Preprecessor definitions that presist after cppad/cppad.hpp is included:
 # undef CPPAD_REVERSE_SWEEP_TRACE
 # undef CPPAD_REV_HES_SWEEP_TRACE
 # undef CPPAD_REV_JAC_SWEEP_TRACE
-# undef CPPAD_SIZE_T_SAME_UNSIGNED_INT
+# undef CPPAD_SIZE_T_NOT_UNSIGNED_INT
 # undef CPPAD_STANDARD_MATH_UNARY
 # undef CPPAD_STANDARD_MATH_UNARY_AD
 # undef CPPAD_STDVECTOR

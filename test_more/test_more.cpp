@@ -19,6 +19,7 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 // prototype external compiled tests (this line expected by bin/new_test.sh)
 extern bool abs(void);
 extern bool Acos(void);
+extern bool adfun_copy(void);
 extern bool Add(void);
 extern bool AddEq(void);
 extern bool AddZero(void);
@@ -48,6 +49,7 @@ extern bool Exp(void);
 extern bool ForHess(void);
 extern bool for_sparse_jac(void);
 extern bool Forward(void);
+extern bool forward_dir(void);
 extern bool forward_order(void);
 extern bool FromBase(void);
 extern bool FunCheck(void);
@@ -60,7 +62,6 @@ extern bool Mul(void);
 extern bool mul_level(void);
 extern bool MulEq(void);
 extern bool MulZeroOne(void);
-extern bool ndebug(void);
 extern bool NearEqualExt(void);
 extern bool Neg(void);
 extern bool ode_err_control(void);
@@ -132,6 +133,7 @@ int main(void)
 	// run external compiled tests (this line expected by bin/new_test.sh)
 	ok &= Run( abs,             "abs"            );
 	ok &= Run( Acos,            "Acos"           );
+	ok &= Run( adfun_copy,      "adfun_copy"     );
 	ok &= Run( Add,             "Add"            );
 	ok &= Run( AddEq,           "AddEq"          );
 	ok &= Run( AddZero,         "AddZero"        );
@@ -157,6 +159,7 @@ int main(void)
 	ok &= Run( ForHess,         "ForHess"        );
 	ok &= Run( for_sparse_jac,  "for_sparse_jac" );
 	ok &= Run( Forward,         "Forward"        );
+	ok &= Run( forward_dir,     "forward_dir"    );
 	ok &= Run( forward_order,   "forward_order"  );
 	ok &= Run( FromBase,        "FromBase"       );
 	ok &= Run( FunCheck,        "FunCheck"       );
@@ -168,7 +171,6 @@ int main(void)
 	ok &= Run( mul_level,       "mul_level"      );
 	ok &= Run( MulEq,           "MulEq"          );
 	ok &= Run( MulZeroOne,      "MulZeroOne"     );
-	ok &= Run( ndebug,          "ndebug"         );
 	ok &= Run( NearEqualExt,    "NearEqualExt"   );
 	ok &= Run( Neg,             "Neg"            );
 	ok &= Run( ode_err_control, "ode_err_control");
