@@ -166,6 +166,9 @@ inline void forward_comp_op_0(
 		default:
 		CPPAD_ASSERT_UNKNOWN(0);
 	}
+	if (count==1) {
+		CPPAD_ASSERT_UNKNOWN(arg[0]);
+	}
 	return;
 }
 } // END_CPPAD_NAMESPACE

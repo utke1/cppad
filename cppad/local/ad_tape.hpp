@@ -132,12 +132,14 @@ private:
 		const pod_vector<Base>&  data
 	);
 
+	int myBreakOnOpIndex;
 public:
 	// default constructor and destructor
 
 	// public function only used by CppAD::Independent
 	template <typename VectorADBase>
 	void Independent(VectorADBase &u);
+	void breakOnOpIndex(int index);
 
 };
 // ---------------------------------------------------------------------------

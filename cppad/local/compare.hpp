@@ -180,8 +180,12 @@ void ADTape<Base>::RecordCompare(
 
 	// put the operator in the tape
 	Rec_.PutOp(ComOp);
+	if (Rec_.num_op_rec() == myBreakOnOpIndex) {
+		CPPAD_ASSERT_KNOWN(0,"bad op is here");
+	}
 	Rec_.PutArg(ind0, ind1, ind2, ind3);
 }
+
 
 // -------------------------------- < -------------------------
 # ifdef NDEBUG

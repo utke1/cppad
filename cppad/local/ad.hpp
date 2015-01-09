@@ -40,6 +40,8 @@ class AD {
 	// template friend functions where template parameter is not bound
 	template <class VectorAD>
 	friend void Independent(VectorAD &x);
+	template <class VectorAD>
+	friend void IndependentDiag(VectorAD &x, int opIndex);
 
 	// one argument functions
 	friend bool Parameter          <Base> 

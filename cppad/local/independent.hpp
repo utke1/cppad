@@ -154,6 +154,11 @@ void ADTape<Base>::Independent(VectorAD &x)
 	size_independent_ = n;
 }
 
+template <typename Base>
+void ADTape<Base>::breakOnOpIndex(int opIndex){
+	myBreakOnOpIndex = opIndex;
+}
+
 template <typename VectorAD>
 inline void Independent(VectorAD &x)
 {	typedef typename VectorAD::value_type ADBase;
@@ -166,10 +171,27 @@ inline void Independent(VectorAD &x)
 	);
 	ADTape<Base>* tape = ADBase::tape_manage(tape_manage_new);
 	tape->Independent(x); 
+	tape->breakOnOpIndex(0);
+}
+
+template <typename VectorAD>
+inline void IndependentDiag(VectorAD &x, int opIndex)
+{	typedef typename VectorAD::value_type ADBase;
+	typedef typename ADBase::value_type   Base;
+	CPPAD_ASSERT_KNOWN(
+		ADBase::tape_ptr() == CPPAD_NULL,
+		"Independent: cannot create a new tape because\n"
+		"a previous tape is still active (for this thread).\n"
+		"AD<Base>::abort_recording() would abort this previous recording."
+	);
+	ADTape<Base>* tape = ADBase::tape_manage(tape_manage_new);
+	tape->Independent(x);
+	tape->breakOnOpIndex(opIndex);
 }
 
 
-} 
+}
+
 // END CppAD namespace
 
 # endif

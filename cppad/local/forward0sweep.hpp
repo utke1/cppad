@@ -307,6 +307,12 @@ size_t forward0sweep(
 			forward_comp_op_0(
 			compareCount, arg, num_par, parameter, J, taylor
 			);
+			if (compareCount==1) {
+				std::ostringstream os;
+				os << " bad comparison at " << i_op << " for " << arg[0] << std::endl;
+				std::cout << os.str();
+				CPPAD_ASSERT_KNOWN(0, os.str().c_str() );
+			}
 			break;
 			// ---------------------------------------------------
 
