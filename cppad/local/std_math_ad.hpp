@@ -312,9 +312,33 @@ namespace CppAD {
      CPPAD_STANDARD_MATH_UNARY_AD(log, LogOp)
      CPPAD_STANDARD_MATH_UNARY_AD(sin, SinOp)
      CPPAD_STANDARD_MATH_UNARY_AD(sinh, SinhOp)
-     CPPAD_STANDARD_MATH_UNARY_AD(sqrt, SqrtOp)
      CPPAD_STANDARD_MATH_UNARY_AD(tan, TanOp)
      CPPAD_STANDARD_MATH_UNARY_AD(tanh, TanhOp)
+
+     template <class Base>
+      inline AD<Base> sqrt(const AD<Base> &x)
+      {   return x.sqrt(); }
+      template <class Base>
+      inline AD<Base> AD<Base>::sqrt (void) const
+      {
+          AD<Base> result;
+          result.value_ = CppAD::sqrt(value_);
+          CPPAD_ASSERT_UNKNOWN( Parameter(result) );
+
+          if( Variable(*this) )
+          {   CPPAD_ASSERT_UNKNOWN( NumRes(SqrtOp) <= 2 );
+              CPPAD_ASSERT_UNKNOWN( NumArg(SqrtOp) == 1 );
+              CPPAD_ASSERT_KNOWN(value_!=Base(0),"derivatives for sqrt(0) provoke floating-point exceptions");
+              ADTape<Base> *tape = tape_this();
+              tape->Rec_.PutArg(taddr_);
+              result.taddr_ = tape->Rec_.PutOp(SqrtOp);
+              result.tape_id_    = tape->id_;
+          }
+          return result;
+      }
+      template <class Base>
+      inline AD<Base> sqrt(const VecAD_reference<Base> &x)
+      {   return sqrt( x.ADBase() ); }
 
      /*!
 	Compute the log of base 10 of x where  has type AD<Base>
