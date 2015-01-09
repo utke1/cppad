@@ -64,9 +64,9 @@ ADD_EXECUTABLE(test_more EXCLUDE_FROM_ALL test_more.cpp
 	${adolc_sources}
 	${colpack_sources}
 	${ipopt_sources}
-	${eigen_sources}
 	abs.cpp
 	acos.cpp
+	adfun_copy.cpp
 	asin.cpp
 	assign.cpp
 	add.cpp
@@ -94,6 +94,7 @@ ADD_EXECUTABLE(test_more EXCLUDE_FROM_ALL test_more.cpp
 	for_hess.cpp
 	for_sparse_jac.cpp
 	forward.cpp
+	forward_dir.cpp
 	forward_order.cpp
 	from_base.cpp
 	fun_check.cpp
@@ -105,7 +106,6 @@ ADD_EXECUTABLE(test_more EXCLUDE_FROM_ALL test_more.cpp
 	mul_eq.cpp
 	mul_level.cpp
 	mul_zero_one.cpp
-	ndebug.cpp
 	near_equal_ext.cpp
 	neg.cpp
 	ode_err_control.cpp

@@ -1,6 +1,6 @@
-/* $Id$ */
+/* $Id: main.cpp 3320 2014-09-11 23:06:21Z bradbell $ */
 /* --------------------------------------------------------------------------
-CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-14 Bradley M. Bell
+CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-15 Bradley M. Bell
 
 CppAD is distributed under multiple licenses. This distribution is under
 the terms of the 
@@ -71,10 +71,10 @@ $index cppad, speed test$$
 $index speed, test cppad$$
 $index test, cppad speed$$
 
-$section Speed Testing a C++ Operator Overloading AD Package$$
+$section Running the Speed Test Program$$
 
 $head Syntax$$
-$codei%speed/%package%/%package% %test% %seed% %option_list%$$
+$codei%speed/%package%/speed_%package% %test% %seed% %option_list%$$
 
 $head Purpose$$
 A version of this program runs the correctness tests
@@ -180,20 +180,6 @@ $cref cppad_det_lu.cpp$$ returns false
 (indicating that the test not implemented)
 when $code global_onetape$$ is true.
 
-$subhead colpack$$
-If the option $code colpack$$ is present, the symbol
-$codep
-	extern bool global_colpack
-$$
-is true and otherwise it is false.
-This symbols only affects the
-$cref/sparse_jacobian/link_sparse_jacobian/$$ and
-$cref/sparse_hessian/link_sparse_hessian/$$ tests.
-If this external symbol is true,
-CppAD will use $cref/colpack/colpack_prefix/$$ to do the coloring 
-for its 
-Otherwise, it will use it's own coloring algorithm.
-
 $subhead optimize$$
 If the option $code optimize$$ is present, the symbol
 $codep
@@ -227,6 +213,12 @@ the main program before any of the tests are executed.
 This should make the CppAD $code thread_alloc$$ allocator faster.
 If it is false, CppAD will used standard memory allocation. 
 
+$head Sparsity Options$$
+The following options only apply to the 
+$cref/sparse_jacobian/link_sparse_jacobian/$$ and
+$cref/sparse_hessian/link_sparse_hessian/$$ tests.
+The other tests will ignore these options:
+
 $subhead boolsparsity$$
 If the option $code boolsparsity$$ is present, the symbol
 $codep
@@ -235,13 +227,20 @@ $$
 is true and otherwise it is false.
 If it is true, CppAD will use a
 $cref/vector of bool/glossary/Sparsity Pattern/Vector of Boolean/$$
-for its sparsity patterns during the
-$cref/sparse_jacobian/link_sparse_jacobian/$$ and
-$cref/sparse_hessian/link_sparse_hessian/$$ speed tests.
+for its sparsity patterns. 
 Otherwise it will use a 
 $cref/vector of sets/glossary/Sparsity Pattern/Vector of Sets/$$.
-The other tests do not use sparsity patterns and so they return false
-if this option is chosen.
+
+$subhead colpack$$
+If the option $code colpack$$ is present, the symbol
+$codep
+	extern bool global_colpack
+$$
+is true and otherwise it is false.
+If this external symbol is true,
+CppAD will use $cref/colpack/colpack_prefix/$$ to do the coloring 
+for its 
+Otherwise, it will use it's own coloring algorithm.
 
 $head Correctness Results$$
 One, but not both, of the following two output lines
@@ -271,15 +270,19 @@ size arguments used for the corresponding tests.
 The values $icode rate_1$$, ..., $icode rate_n$$ are the number of times
 per second that the corresponding size problem executed.
 
-$subhead sparse_jacobian$$
-The $cref/sparse_jacobian/link_sparse_jacobian/$$ test has an extra output
+$subhead n_sweep$$
+The $cref/sparse_jacobian/link_sparse_jacobian/$$ 
+and $cref/sparse_hessian/link_sparse_hessian/$$ tests has an extra output
 line with the following form
 $codei%
-	%package%_sparse_jacobian_n_sweep = [ %n_sweep_1%, %...%, %n_sweep_n% ]
+	%package%_sparse_%test%_n_sweep = [ %n_sweep_1%, %...%, %n_sweep_n% ]
 %$$
+were $icode test$$ is $code jacobian$$ ($code hessian$$).
 The values $icode n_sweep_1$$, ..., $icode n_sweep_n$$ are the number of 
-sweeps (colors) used for each sparse Jacobian calculation; see
-$cref/n_sweep/sparse_jacobian/n_sweep/$$.
+sweeps (colors) used for each sparse Jacobian (Hessian) calculation; see
+$icode n_sweep$$ for
+$cref/sparse_jacobian/sparse_jacobian/n_sweep/$$ and
+$cref/sparse_hessian/sparse_hessian/n_sweep/$$.
 
 
 $children%
@@ -328,6 +331,7 @@ CPPAD_DECLARE_SPEED(sparse_jacobian);
 
 // info is different for each test
 extern void info_sparse_jacobian(size_t size, size_t& n_sweep);
+extern void info_sparse_hessian(size_t size, size_t& n_sweep);
 
 // --------------------------------------------------------------------------
 
@@ -688,7 +692,18 @@ int main(int argc, char *argv[])
 			"sparse_hessian"
 		);
 		run_speed(
-		speed_sparse_hessian, size_sparse_hessian,  "sparse_hessian");
+			speed_sparse_hessian, size_sparse_hessian,  "sparse_hessian"
+		);
+		cout << AD_PACKAGE << "_sparse_hessian_sweep = ";
+		for(i = 0; i < size_sparse_hessian.size(); i++)
+		{	if( i == 0 )
+				cout << "[ ";
+			else	cout << ", ";	
+			size_t n_sweep;
+			info_sparse_hessian(size_sparse_hessian[i], n_sweep);
+			cout << n_sweep;
+		}
+		cout << " ]" << endl;
 		break;
 		// ---------------------------------------------------------
 
@@ -703,10 +718,10 @@ int main(int argc, char *argv[])
 			"sparse_jacobian"
 		);
 		run_speed(
-		speed_sparse_jacobian, size_sparse_jacobian, "sparse_jacobian"
+			speed_sparse_jacobian, size_sparse_jacobian, "sparse_jacobian"
 		);
 		cout << AD_PACKAGE << "_sparse_jacobian_n_sweep = ";
-		for(size_t i = 0; i < size_sparse_jacobian.size(); i++)
+		for(i = 0; i < size_sparse_jacobian.size(); i++)
 		{	if( i == 0 )
 				cout << "[ ";
 			else	cout << ", ";	

@@ -12,7 +12,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 /*
 $begin adolc_poly.cpp$$
 $spell
-	boolsparsity
 	alloc
 	onetape
 	coef
@@ -56,11 +55,10 @@ $codep */
 # include <cppad/poly.hpp>
 # include <cppad/vector.hpp>
 # include <cppad/thread_alloc.hpp>
-# include "alloc_mat.hpp"
+# include "adolc_alloc_mat.hpp"
 
 // list of possible options
 extern bool global_memory, global_onetape, global_atomic, global_optimize;
-extern bool global_boolsparsity;
 
 bool link_poly(
 	size_t                     size     , 
@@ -69,7 +67,7 @@ bool link_poly(
 	CppAD::vector<double>     &z        ,  // polynomial argument value
 	CppAD::vector<double>     &ddp      )  // second derivative w.r.t z  
 {
-	if( global_atomic || global_boolsparsity )
+	if( global_atomic )
 		return false;
 	if( global_memory || global_optimize )
 		return false;

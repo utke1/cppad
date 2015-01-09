@@ -64,8 +64,8 @@ echo_eval() {
 }
 # -----------------------------------------------------------------------------
 echo 'Download sacado to build/external and install it to build/prefix'
-version="trilinos-10.8.3-Source"
-web_page="http://trilinos.sandia.gov/download/files"
+version="trilinos-11.12.1-Source"
+web_page="http://trilinos.org/oldsite/download/files"
 prefix=`pwd`'/build/prefix'
 # -----------------------------------------------------------------------------
 # determine which version of cmake to use

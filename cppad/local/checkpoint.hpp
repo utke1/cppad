@@ -15,7 +15,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file checkpoint.hpp
 defining checkpoint functions.
 */
@@ -275,7 +274,9 @@ public:
 
 		// no longer need the Taylor coefficients in f_
 		// (have to reconstruct them every time)
-		f_.capacity_order(0);
+		size_t c = 0;
+		size_t r = 0;
+		f_.capacity_order(c, r);
 		return ok;
 	}
 	/*!
@@ -318,7 +319,9 @@ public:
 
 		// no longer need the Taylor coefficients in f_
 		// (have to reconstruct them every time)
-		f_.capacity_order(0);
+		size_t c = 0;
+		size_t r = 0;
+		f_.capacity_order(c, r);
 		return ok;
 	}
 	/*!

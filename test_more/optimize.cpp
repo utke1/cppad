@@ -1430,10 +1430,208 @@ namespace {
 	
 		return ok;
 	}
+	// -----------------------------------------------------------------------
+	double floor(const double& x)
+	{	return std::floor(x); }
+	CPPAD_DISCRETE_FUNCTION(double, floor)
+	bool discrete_function(void)
+	{	bool ok = true;
+		using CppAD::vector;
+	
+		vector< CppAD::AD<double> > ax(1), ay(1);
+		ax[0] = 0.0; 
+		CppAD::Independent(ax);
+		ay[0] =  floor(ax[0]) + floor(ax[0]);  
+		CppAD::ADFun<double> f(ax, ay);
+	
+		size_t size_before = f.size_var();
+		f.optimize(); 
+		size_t size_after = f.size_var();
+		ok &= size_after + 1 == size_before;
+	
+		vector<double> x(1), y(1);
+		x[0] = -2.2;
+		y    = f.Forward(0, x);
+		ok &= y[0] == -6.0;
+	
+		return ok;
+	}
+	// ----------------------------------------------------------------
+	void i_algo( 
+		const CppAD::vector< CppAD::AD<double> >& ax ,
+		      CppAD::vector< CppAD::AD<double> >& ay )
+	{	ay[0] = 1.0 / ax[0]; }
+	//
+	// Test bug where atomic functions were not properly conditionally skipped.
+	bool cond_exp_skip_atomic(void)
+	{	bool ok = true;
+		using CppAD::AD;
+		using CppAD::vector;
+	
+		// Create a checkpoint version of the function i_algo
+		vector< AD<double> > au(1), av(1), aw(1);
+		au[0] = 1.0;
+		CppAD::checkpoint<double> i_check("i_check", i_algo, au, av);
+	
+		// independent variable vector 
+		vector< AD<double> > ax(2), ay(1);
+		ax[0] = 1.0;
+		ax[1] = 2.0;
+		Independent(ax);
+	
+		// call atomic function that does not get used
+		au[0] = ax[0];
+		i_check(au, av);
+		au[0] = ax[1];
+		i_check(au, aw);
+		AD<double> zero = 0.0;
+		ay[0] = CondExpGt(av[0], zero, av[0], aw[0]);
+
+		// create function object f : ax -> ay
+		CppAD::ADFun<double> f(ax, ay);
+
+		// run case that skips the second call to afun
+		// (can use trace in forward0sweep.hpp to see this).
+		vector<double> x(2), y_before(1), y_after(1);
+		x[0]      = 1.0;
+		x[1]      = 2.0;
+		y_before  = f.Forward(0, x);
+		f.optimize();
+		y_after   = f.Forward(0, x);
+	
+		ok &= y_before[0] == y_after[0];
+		
+		return ok;
+	}
+	//
+	// Test bug where conditional dependence did not pass through
+	// atomic functions
+	bool cond_exp_atomic_dependence(void)
+	{	bool ok = true;
+		using CppAD::AD;
+		using CppAD::vector;
+	
+		// Create a checkpoint version of the function i_algo
+		vector< AD<double> > au(1), av(1), aw(1);
+		au[0] = 1.0;
+		CppAD::checkpoint<double> i_check("i_check", i_algo, au, av);
+	
+		vector< AD<double> > ax(2), ay(1);
+		AD<double> zero = 0.0;  
+		ax[0] = 1.0;
+		ax[1] = 1.0;
+		Independent(ax);
+		av[0] = ax[0] + ax[1];
+		i_check(av, aw);
+		ay[0] = CondExpGt(aw[0], zero, zero, aw[0]);
+		CppAD::ADFun<double> f;
+		f.Dependent(ax, ay);
+
+		// run case that skips the second call to afun
+		// (but not for order zero)
+		vector<double> x(2), y_before(1), y_after(1);
+		vector<double> dx(2), dy_before(1), dy_after(1);
+		x[0]      = 1.0;
+		x[1]      = 1.0;
+		y_before  = f.Forward(0, x);
+		dx[0]     = 2.0;
+		dx[1]     = 2.0;
+		dy_before = f.Forward(1, dx);
+		f.optimize();
+		y_after   = f.Forward(0, x);
+		dy_after  = f.Forward(1, dx);
+
+		ok &= y_before[0]  == y_after[0];
+		ok &= dy_before[0] == dy_after[0];
+
+		return ok;
+	}
+	// -----------------------------------------------------------------------
+	// Test reverse mode conditionalay skipping commands.
+	template <class Type>
+	Type my_max(const CppAD::vector<Type>& arg)
+	{	Type res = arg[0];
+		for(size_t j = 0;j < arg.size(); j++)
+    		res = CondExpGt(res, arg[j], res, arg[j]);
+		return res;
+  	}
+	bool cond_exp_reverse(void)
+	{	bool ok = true;
+		size_t n = 3;
+		using CppAD::vector;
+		using CppAD::AD;
+	
+		vector< AD<double> > ax(n), ay(1);
+		for(size_t j = 0; j < n; j++)
+			ax[j] = 1.0;
+		Independent(ax);
+		ay[0] = my_max(ax) + my_max(ax);
+		CppAD::ADFun<double> f(ax, ay);
+	
+		f.optimize();
+	
+		vector<double> x(n), w(1), dx(n);
+		for(size_t j = 0;j < n; j++)
+			x[j] = double(j);
+		f.Forward(0, x);
+		w[0] = 1.0;
+		dx = f.Reverse(1, w);
+		for(size_t j = 0; j < n; j++)
+		{	if( j == n-1 )
+				ok &= dx[j] == 2.0;
+			else
+				ok &= dx[j] == 0.0;
+		}
+		return ok;
+	}
+	// Test case where an expression depends on both the true
+	// and false cases (bug fixed 2014-12-22)
+	bool cond_exp_both_true_and_false(void)
+	{	bool ok = true;
+		using CppAD::vector;
+		using CppAD::AD;
+
+		// f(x) = x[0] + x[0] if x[0] >= 3
+		//      = x[0] + x[1] otherwise 
+		vector< AD<double> > ax(2), ay(3);
+		ax[0] = 1.0;
+		ax[1] = 2.0;
+		Independent(ax);
+		AD<double> three(3);
+		AD<double> value = ax[0] + ax[1];
+		// a simple value
+		ay[0]  = CppAD::CondExpGe(ax[0], three, value, value);
+		// a  binary exprpression
+		ay[1]  = CppAD::CondExpGe(ax[0], three, ax[0]-ax[1], ax[0]-ax[1]);
+		// a unary expression
+		ay[2]  = CppAD::CondExpGe(ax[0], three, exp(ax[0]), exp(ax[0]) );
+		CppAD::ADFun<double> f(ax, ay);
+		f.optimize();
+
+		// check case where x[0] >= 3
+		vector<double> x(2), y(3);
+		x[0] = 4.0;
+		x[1] = 2.0;
+		y    = f.Forward(0, x);
+		ok  &= y[0] == x[0] + x[1];
+		ok  &= y[1] == x[0] - x[1];
+		ok  &= y[2] == exp(x[0]);
+
+		// check case where x[0] < 3
+		x[0] = 1.0;
+		x[1] = 2.0;
+		y    = f.Forward(0, x);
+		ok  &= y[0] == x[0] + x[1];
+		ok  &= y[1] == x[0] - x[1];
+		ok  &= y[2] == exp(x[0]);
+
+		return ok;
+	}
 }
 
 bool optimize(void)
 {	bool ok = true;
+
 	atomic_sparsity_option = CppAD::atomic_base<double>::bool_sparsity_enum;
 	for(size_t i = 0; i < 2; i++)
 	{	// check conditional expression sparsity pattern 
@@ -1472,6 +1670,16 @@ bool optimize(void)
 	ok     &= old_atomic_test();
 	// case where results are not identically equal
 	ok     &= not_identically_equal();
+	// case where a discrete function is used
+	ok     &= discrete_function();
+	// check conditional skip of an atomic function
+	ok     &= cond_exp_skip_atomic();
+	// check conditional dependence through atomic function
+	ok     &= cond_exp_atomic_dependence();
+	// check reverse mode conditional skipping
+	ok     &= cond_exp_reverse();
+	// check case where an expresion needed by both true and false case
+	ok     &=  cond_exp_both_true_and_false();
 	//
 	CppAD::user_atomic<double>::clear();
 	return ok;

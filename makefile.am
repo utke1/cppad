@@ -151,6 +151,8 @@ nobase_myinclude_HEADERS =  \
 	cppad/local/bool_valued.hpp \
 	cppad/local/capacity_order.hpp \
 	cppad/local/checkpoint.hpp \
+	cppad/local/color_general.hpp \
+	cppad/local/color_symmetric.hpp \
 	cppad/local/compare.hpp \
 	cppad/local/comp_op.hpp \
 	cppad/local/compute_assign.hpp \
@@ -175,6 +177,7 @@ nobase_myinclude_HEADERS =  \
 	cppad/local/epsilon.hpp \
 	cppad/local/equal_op_seq.hpp \
 	cppad/local/erf.hpp \
+	cppad/local/erf_op.hpp \
 	cppad/local/exp_op.hpp \
 	cppad/local/for_jac_sweep.hpp \
 	cppad/local/for_one.hpp \
@@ -182,6 +185,7 @@ nobase_myinclude_HEADERS =  \
 	cppad/local/for_two.hpp \
 	cppad/local/forward0sweep.hpp \
 	cppad/local/forward1sweep.hpp \
+	cppad/local/forward2sweep.hpp \
 	cppad/local/forward.hpp \
 	cppad/local/fun_check.hpp \
 	cppad/local/fun_construct.hpp \
@@ -234,7 +238,6 @@ nobase_myinclude_HEADERS =  \
 	cppad/local/sparse_binary_op.hpp \
 	cppad/local/sparse_hessian.hpp \
 	cppad/local/sparse.hpp \
-	cppad/local/sparse_color.hpp \
 	cppad/local/sparse_jacobian.hpp \
 	cppad/local/sparse_list.hpp \
 	cppad/local/sparse_pack.hpp \
@@ -334,6 +337,7 @@ EXTRA_DIST = \
 	cppad_ipopt/test/CMakeLists.txt \
 	cppad_ipopt/CMakeLists.txt \
 	cppad_ipopt/speed/CMakeLists.txt \
+	speed/main.cpp \
 	speed/cppad/CMakeLists.txt \
 	speed/adolc/CMakeLists.txt \
 	speed/fadbad/CMakeLists.txt \

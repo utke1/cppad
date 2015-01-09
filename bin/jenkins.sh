@@ -10,6 +10,19 @@
 # A copy of this license is included in the COPYING file of this distribution.
 # Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 # -----------------------------------------------------------------------------
+if [ $0 != "bin/jenkins.sh" ]
+then
+	echo "bin/jenkins.sh: must be executed from its parent directory"
+	exit 1
+fi
+if [ "$1" != 'none' ] && [ "$1" != 'build' ] && [ "$1" != 'install' ] 
+then
+	echo 'bin/junk.sh: redo_external'
+	echo 'Where redo_external is one of: build, install, none' 
+	exit 1
+fi
+redo_external="$1"
+# -----------------------------------------------------------------------------
 # distribution directory corresponding to this version of CppAD
 trunk_dir=`pwd`
 # -----------------------------------------------------------------------------
@@ -18,14 +31,7 @@ echo_eval() {
 	echo $*
 	eval $*
 }
-# bash function that echos and executes a command
-for ext in log err
-do
-	if [ -e "../jenkins.$ext" ]
-	then
-		echo_eval rm ../jenkins.$ext
-	fi
-done
+# bash function that logs stdout, stderr, and executes a command
 log_eval() {
 	echo "------------------------------------------------" >> ../jenkins.log
 	echo "------------------------------------------------" >> ../jenkins.err
@@ -46,12 +52,6 @@ do
 		echo_eval rm ../jenkins.$ext
 	fi
 done
-# -----------------------------------------------
-if [ $0 != "bin/jenkins.sh" ]
-then
-	echo "bin/jenkins.sh: must be executed from its parent directory"
-	exit 1
-fi
 # --------------------------------------------------------------------------
 if [ -e /usr/lib64 ]
 then
@@ -60,10 +60,20 @@ else
 	libdir='lib'
 fi
 # -----------------------------------------------------------------------
-# The following test can be used to skip install of other packages
-skip='false'
-if [ "$skip" != 'true' ]
+g++ --version
+# -----------------------------------------------------------------------
+# Build and install external packages
+if [ "$redo_external" != 'none' ]
 then
+	# -------------------------------------------------------------------
+	# this comand cleans out the previous install for all externals
+	echo_eval rm -rf build/prefix 
+	# -------------------------------------------------------------------
+	if [ "$redo_extrnal" == 'build' ]
+	then
+		# This command causes a new download, and compile for all externals
+		echo_eval rm -rf build/external
+	fi
 	# -------------------------------------------------------------------
 	# Running bin/get_fadbad.sh will install include files in
 	#	$trunk_dir/build/prefix/include/FADBAD++
@@ -86,11 +96,14 @@ then
 	#	$trunk_dir/build/prefix/$libdir
 	log_eval bin/get_sacado.sh
 	# -------------------------------------------------------------------
+	# Running bin/get_colpack.sh will install library files in
+	#	$trunk_dir/build/prefix/$libdir
+	log_eval bin/get_colpack.sh
+	# -------------------------------------------------------------------
 	# Running bin/get_acolc.sh will install include files in
 	#	$trunk_dir/build/prefix/include/adolc
 	# and library files in
 	#	$trunk_dir/build/prefix/$libdir
-	log_eval bin/get_colpack.sh
 	log_eval bin/get_adolc.sh
 	# -------------------------------------------------------------------
 fi

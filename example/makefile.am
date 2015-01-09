@@ -26,12 +26,14 @@ ADOLC_LIB         =
 ADOLC_FLAGS       =
 endif
 # -------------------------------------------------------------------------
+if CppAD_HAVE_AR
 if CppAD_EIGEN_DIR
 # make a special library so can have it's own compile flags (see configure.ac)
 EIGEN_EXTRA_FILES   =
 noinst_LIBRARIES    = libeigen.a
 libeigen_a_SOURCES  =  eigen_det.cpp eigen_array.cpp
 EIGEN_LIB           = -L. -leigen
+EIGEN_FLAGS         = -DCPPAD_EIGEN_EXAMPLES
 libeigen_a_CXXFLAGS = \
 	-g $(CXX_FLAGS_EIGEN) \
 	-DCPPAD_EIGEN_EXAMPLES \
@@ -39,21 +41,28 @@ libeigen_a_CXXFLAGS = \
 else
 EIGEN_EXTRA_FILES   = eigen_det.cpp eigen_array.cpp
 EIGEN_LIB           =
+EIGEN_FLAGS         = 
+endif
+else
+EIGEN_EXTRA_FILES   = eigen_det.cpp eigen_array.cpp
+EIGEN_LIB           =
+EIGEN_FLAGS         =
 endif
 # -------------------------------------------------------------------------
 # auto-tools does not support use of colpack
 EXTRA_DIST        =  \
 	test_one.sh.in \
-	colpack.cpp \
+	colpack_hes.cpp \
+	colpack_jac.cpp \
 	$(ADOLC_EXTRA_FILES) \
 	$(EIGEN_EXTRA_FILES)
 #
 check_PROGRAMS    = example 
 #
 if CppAD_MS_COMPILER
-AM_CXXFLAGS       = -EHsc -g $(ADOLC_FLAGS) $(CXX_FLAGS)
+AM_CXXFLAGS       = -EHsc -g $(ADOLC_FLAGS) $(EIGEN_FLAGS) $(CXX_FLAGS)
 else
-AM_CXXFLAGS       = -g $(ADOLC_FLAGS) $(CXX_FLAGS)
+AM_CXXFLAGS       = -g $(ADOLC_FLAGS) $(EIGEN_FLAGS) $(CXX_FLAGS)
 endif
 #
 AM_CPPFLAGS       = \
@@ -61,7 +70,8 @@ AM_CPPFLAGS       = \
 	-I$(top_srcdir) \
 	$(BOOST_INCLUDE) \
 	$(EIGEN_INCLUDE) \
-	$(ADOLC_FLAGS)
+	$(ADOLC_FLAGS) \
+	$(EIGEN_FLAGS)
 #
 LDADD        =  $(ADOLC_LIB)  $(BTHREAD_LIB) $(EIGEN_LIB) $(PTHREAD_LIB)
 #
@@ -109,6 +119,7 @@ example_SOURCES   = \
 	for_one.cpp \
 	for_two.cpp \
 	forward.cpp \
+	forward_dir.cpp \
 	forward_order.cpp \
 	for_sparse_jac.cpp \
 	fun_assign.cpp \
@@ -144,7 +155,6 @@ example_SOURCES   = \
 	nan.cpp \
 	near_equal.cpp \
 	near_equal_ext.cpp \
-	not_complex_ad.cpp \
 	number_skip.cpp \
 	numeric_type.cpp \
 	ode_err_control.cpp \

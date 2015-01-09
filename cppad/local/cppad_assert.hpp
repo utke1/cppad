@@ -14,7 +14,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 -------------------------------------------------------------------------- */
 
 /*!
-\{
 \file cppad_assert.hpp
 Define the CppAD error checking macros (all of which begin with CPPAD_ASSERT_)
 */
@@ -196,6 +195,21 @@ execution is terminated and the source code line number is reported.
 		);                                                            \
 		assert_first_call = false;                                    \
 	}
+# endif
+
+/*!
+\def CPPAD_ASSERT_ARG_BEFORE_RESULT
+Check that operator arguments come before result.
+
+If \c NDEBUG is defined, this macro has no effect,
+otherwise it calls the function assert_arg_before_result.
+*/
+# ifdef NDEBUG
+# define CPPAD_ASSERT_ARG_BEFORE_RESULT(op, arg, result)
+# else
+# define CPPAD_ASSERT_ARG_BEFORE_RESULT(op, arg, result) \
+	assert_arg_before_result(op, arg, result)
+	
 # endif
 
 # endif

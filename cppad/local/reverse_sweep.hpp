@@ -16,7 +16,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file reverse_sweep.hpp
 Compute derivatives of arbitrary order Taylor coefficients.
 */
@@ -77,23 +76,36 @@ is a recording of the operations corresponding to the function
 \f]
 where \f$ n \f$ is the number of independent variables and
 \f$ m \f$ is the number of dependent variables.
-We define the function 
-\f$ G : {\bf R}^{n \times d} \rightarrow {\bf R} \f$ by
+We define \f$ u^{(k)} \f$ as the value of <code>x_k</code> in the previous call
+of the form
+<code>
+	f.Forward(k, x_k)
+</code>
+We define 
+\f$ X : {\bf R}^{n \times d} \rightarrow {\bf R}^n \f$ by
 \f[
-G( u ) = \frac{1}{d !} \frac{ \partial^d }{ \partial t^d } 
-\left[ 
-	\sum_{i=1}^m w_i  F_i ( u^{(0)} + u^{(1)} t + \cdots + u^{(d)} t^d )
-\right]_{t=0}
+	X(t, u) =  u^{(0)} + u^{(1)} t + \cdots + u^{(d)} t^d
 \f]
-Note that the scale factor  1 / a d  converts 
-the \a d-th partial derivative to the \a d-th order Taylor coefficient.
-This routine computes the derivative of \f$ G(u) \f$
+We define 
+\f$ Y : {\bf R}^{n \times d} \rightarrow {\bf R}^m \f$ by
+\f[
+	Y(t, u) =  F[ X(t, u) ]
+\f]
+We define the function 
+\f$ W : {\bf R}^{n \times d} \rightarrow {\bf R} \f$ by
+\f[
+W(u) 
+= 
+\sum_{k=0}^{d} ( w^{(k)} )^{\rm T} 
+	\frac{1}{k !} \frac{\partial^k}{\partial t^k} Y(0, u)
+\f]
+(The matrix \f$ w \in {\bf R}^m \f$,
+is defined below under the heading Partial.)
+Note that the scale factor  1 / k  converts 
+the k-th partial derivative to the k-th order Taylor coefficient.
+This routine computes the derivative of \f$ W(u) \f$
 with respect to all the Taylor coefficients
 \f$ u^{(k)} \f$ for \f$ k = 0 , ... , d \f$.
-The vector \f$ w \in {\bf R}^m \f$, and
-value of \f$ u \in {\bf R}^{n \times d} \f$
-at which the derivative is computed,
-are defined below.
 \n
 \n
 The object \a play is effectly constant.
@@ -124,11 +136,11 @@ It must be greater than or equal \a d + 1.
 \param Partial
 \b Input:
 The last \f$ m \f$ rows of \a Partial are inputs.
-The vector \f$ v \f$, used to define \f$ G(u) \f$,
+The matrix \f$ w \f$, used to define \f$ W(u) \f$,
 is specified by these rows. 
-For i = 0 , ... , m - 1, \a Partial [ ( \a numvar - m + i ) * K + d ] = v_i.
-For i = 0 , ... , m - 1 and for k = 0 , ... , d - 1, 
-\a Partial [ ( \a numvar - m + i ) * K + k ] = 0.
+For i = 0 , ... , m - 1, 
+for k = 0 , ... , d,
+<code>Partial [ (numvar - m + i ) * K + k ] = w[i,k]</code>.
 \n
 \n
 \b Temporary:
@@ -140,7 +152,7 @@ and its output value is not defined.
 \b Output:
 For j = 1 , ... , n and for k = 0 , ... , d, 
 \a Partial [ j * K + k ] 
-is the partial derivative of \f$ G( u ) \f$ with 
+is the partial derivative of \f$ W( u ) \f$ with 
 respect to \f$ u_j^{(k)} \f$.
 
 \param cskip_op
@@ -238,30 +250,45 @@ void ReverseSweep(
 			{	// CSumOp has a variable number of arguments
 				play->reverse_csum(op, arg, i_op, i_var);
 			}
-			play->reverse_next(op, arg, i_op, i_var);
+			CPPAD_ASSERT_UNKNOWN( op != CSkipOp );
+			// if( op == CSkipOp )
+			// {	// CSkip has a variable number of arguments
+			// 	play->reverse_cskip(op, arg, i_op, i_var);
+			// }
 			CPPAD_ASSERT_UNKNOWN( i_op < play->num_op_rec() );
+			play->reverse_next(op, arg, i_op, i_var);
 		}
 
 		// rest of informaiton depends on the case
 # if CPPAD_REVERSE_SWEEP_TRACE
+		if( op == CSumOp )
+		{	// CSumOp has a variable number of arguments
+			play->reverse_csum(op, arg, i_op, i_var);
+		}
+		if( op == CSkipOp )
+		{	// CSkip has a variable number of arguments
+			play->reverse_cskip(op, arg, i_op, i_var);
+		}
 		size_t       i_tmp  = i_var;
 		const Base*  Z_tmp  = Taylor + i_var * J;
 		const Base*  pZ_tmp = Partial + i_var * K;
-
 		printOp(
 			std::cout, 
 			play,
 			i_op,
 			i_tmp,
 			op, 
-			arg,
+			arg
+		);
+		if( NumRes(op) > 0 && op != BeginOp ) printOpResult(
+			std::cout, 
 			d + 1, 
 			Z_tmp, 
 			d + 1, 
 			pZ_tmp 
 		);
+		std::cout << std::endl;
 # endif
-
 		switch( op )
 		{
 
@@ -324,7 +351,9 @@ void ReverseSweep(
 			// CSkipOp has a variable number of arguments and
 			// forward_next thinks it one has one argument.
 			// we must inform reverse_next of this special case.
+# if ! CPPAD_REVERSE_SWEEP_TRACE
 			play->reverse_cskip(op, arg, i_op, i_var);
+# endif
 			break;
 			// -------------------------------------------------
 
@@ -332,7 +361,9 @@ void ReverseSweep(
 			// CSumOp has a variable number of arguments and
 			// reverse_next thinks it one has one argument.
 			// We must inform reverse_next of this special case.
+# if ! CPPAD_REVERSE_SWEEP_TRACE
 			play->reverse_csum(op, arg, i_op, i_var);
+# endif
 			reverse_csum_op(
 				d, i_var, arg, K, Partial
 			);
@@ -402,6 +433,15 @@ void ReverseSweep(
 				d, i_var, arg, parameter, J, Taylor, K, Partial
 			);
 			break;
+			// --------------------------------------------------
+
+# if CPPAD_COMPILER_HAS_ERF
+			case ErfOp:
+			reverse_erf_op(
+				d, i_var, arg, parameter, J, Taylor, K, Partial
+			);
+			break;
+# endif
 			// --------------------------------------------------
 
 			case ExpOp:

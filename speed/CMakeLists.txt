@@ -1,6 +1,6 @@
 # $Id$
 # -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-14 Bradley M. Bell
+# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-15 Bradley M. Bell
 #
 # CppAD is distributed under multiple licenses. This distribution is under
 # the terms of the 
@@ -14,6 +14,7 @@
 
 # CppAD developers use MinSizeRel for profiling the speed tests
 SET(CMAKE_CXX_FLAGS_MINSIZEREL "-O0 -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 # Specify build type for this directory and all its subdirectories. 
 # Possible values are DEBUG, RELEASE, RelWithDebInfo and MinSizeRel

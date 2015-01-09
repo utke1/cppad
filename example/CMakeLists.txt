@@ -28,7 +28,11 @@ SET(sources mul_level_adolc.cpp mul_level_adolc_ode.cpp)
 sources_libs_define(adolc "${sources}" adolc ADOLC_EXAMPLES)
 
 # colpack_prefix
-SET(sources colpack.cpp ../cppad/local/cppad_colpack.cpp)
+SET(sources 
+	colpack_hes.cpp 
+	colpack_jac.cpp 
+	../cppad/local/cppad_colpack.cpp
+)
 sources_libs_define(colpack "${sources}" ColPack COLPACK_EXAMPLES)
 
 # eigen_prefix
@@ -109,6 +113,7 @@ ADD_EXECUTABLE(example EXCLUDE_FROM_ALL example.cpp
 	for_one.cpp
 	for_two.cpp
 	forward.cpp
+	forward_dir.cpp
 	forward_order.cpp
 	for_sparse_jac.cpp
 	fun_assign.cpp
@@ -144,7 +149,6 @@ ADD_EXECUTABLE(example EXCLUDE_FROM_ALL example.cpp
 	nan.cpp
 	near_equal.cpp
 	near_equal_ext.cpp
-	not_complex_ad.cpp
 	number_skip.cpp
 	numeric_type.cpp
 	ode_err_control.cpp

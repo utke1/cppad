@@ -15,7 +15,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file hash_code.hpp
 CppAD hashing utility.
 */
@@ -80,7 +79,7 @@ If it is not one of the following operartors, the operator is not
 hash coded and zero is returned:
 
 \li unary operators:
-AbsOp, AcosOp, AsinOp, AtanOp, CosOp, CoshOp, DisOp,
+AbsOp, AcosOp, AsinOp, AtanOp, CosOp, CoshOp
 ExpOp, LogOp, SinOp, SinhOp, SqrtOp, TanOp, TanhOp
 
 \li binary operators where first argument is a parameter:
@@ -89,7 +88,10 @@ AddpvOp, DivpvOp, MulpvOp, PowpvOp, SubpvOp,
 \li binary operators where second argument is a parameter:
 DivvpOp, PowvpOp, SubvpOp
 
-\li binary operators where both arguments are parameters:
+\li binary operators where first is an index and second is a variable:
+DisOp
+
+\li binary operators where both arguments are variables:
 AddvvOp, DivvvOp, MulvvOp, PowvvOp, SubvvOp
 
 \param arg
@@ -176,6 +178,10 @@ unsigned short hash_code(
 			code += v[i];
 		break;
 
+		// Binary operator where first argument is an index and
+		// second is a variable (same as both variables).
+		case DisOp:
+
 		// Binary operators where both arguments are variables
 		case AddvvOp:
 		case DivvvOp:
@@ -211,7 +217,6 @@ unsigned short hash_code(
 		case AtanOp:
 		case CosOp:
 		case CoshOp:
-		case DisOp:
 		case ExpOp:
 		case LogOp:
 		case SignOp:

@@ -15,7 +15,6 @@ Please visit http://www.coin-or.org/CppAD/ for information on other licenses.
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
-\{
 \file rev_hes_sweep.hpp
 Compute Reverse mode Hessian sparsity patterns.
 */
@@ -353,6 +352,14 @@ void RevHesSweep(
 			case DivvpOp:
 			CPPAD_ASSERT_NARG_NRES(op, 2, 1)
 			reverse_sparse_hessian_linear_unary_op(
+			i_var, arg[0], RevJac, for_jac_sparse, rev_hes_sparse
+			);
+			break;
+			// -------------------------------------------------
+
+			case ErfOp:
+			CPPAD_ASSERT_NARG_NRES(op, 1, 1)
+			reverse_sparse_hessian_nonlinear_unary_op(
 			i_var, arg[0], RevJac, for_jac_sparse, rev_hes_sparse
 			);
 			break;
@@ -786,22 +793,29 @@ void RevHesSweep(
 		{	zh_value[j] = true;
 			j = rev_hes_sparse.next_element();
 		}
-		// should also print RevJac[i_var], but printOp does not
-		// yet allow for this.
 		printOp(
 			std::cout, 
 			play,
 			i_op,
 			i_var,
 			op, 
-			arg,
+			arg
+		);
+		// should also print RevJac[i_var], but printOpResult does not
+		// yet allow for this
+		if( NumRes(op) > 0 && op != BeginOp ) printOpResult(
+			std::cout, 
 			1, 
 			&zf_value, 
 			1, 
 			&zh_value
 		);
-# endif
+		std::cout << std::endl;
 	}
+	std::cout << std::endl;
+# else
+	}
+# endif
 	// values corresponding to BeginOp
 	CPPAD_ASSERT_UNKNOWN( i_op == 0 );
 	CPPAD_ASSERT_UNKNOWN( i_var == 0 );
